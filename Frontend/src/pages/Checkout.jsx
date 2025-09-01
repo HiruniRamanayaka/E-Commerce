@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { useCart } from "../context/CartContext.jsx";
+import { useAuth0 } from "@auth0/auth0-react";
 
 const Checkout = () => {
+  const { getAccessTokenSilently, isAuthenticated } = useAuth0();
   const { cartItems, setCartItems } = useCart();
   const [form, setForm] = useState({
     name: "",
@@ -20,6 +22,15 @@ const Checkout = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (cartItems.length === 0) return setMessage("Cart is empty");
+
+    // Get token here
+    let token = null;
+    if (isAuthenticated) {
+      token = await getAccessTokenSilently();
+    } else {
+      setMessage("Please log in to place order");
+      return;
+    }
 
     const order = {
       items: cartItems.map((item) => ({
@@ -43,7 +54,10 @@ const Checkout = () => {
     try {
       const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/orders`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+            "Content-Type": "application/json", 
+            Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify(order),
       });
 
@@ -51,6 +65,7 @@ const Checkout = () => {
 
       setMessage("Order placed successfully!");
       setCartItems([]); // clear cart
+      navigate("/");     // redirect to home
     } catch (err) {
       setMessage(err.message);
     }
