@@ -1,7 +1,7 @@
 import { expressjwt } from "express-jwt";
 import jwksRsa from "jwks-rsa";
 
-const domain = "YOUR_AUTH0_DOMAIN";
+const domain = "dev-u8s4p8uj6dw7435p.us.auth0.com";
 const audience = "https://ecommerce-api";
 
 export const checkJwt = expressjwt({
