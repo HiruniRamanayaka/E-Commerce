@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import connectDB from "./config/db.js";
 import cors from "cors";
 
+import userRoutes from "./routes/userRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 
@@ -16,7 +17,7 @@ app.use(express.json());
 app.use(
   cors({
     origin: "http://localhost:5173", // Vite dev server port
-    methods: ["GET", "POST"],
+    methods: ["GET", "POST", "PUT"],
   })
 );
 
@@ -26,6 +27,7 @@ app.get("/api/health", (req, res) => {
 });
 
 // Routes
+app.use("/api/users", userRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
 

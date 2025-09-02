@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const orderSchema = new mongoose.Schema(
   {
-    owner: { type: String, default: "guest" }, // placeholder until auth added
+    owner: { type: String, required: true, index: true }, // placeholder until auth added
     items: [
       {
         productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },
@@ -11,6 +11,7 @@ const orderSchema = new mongoose.Schema(
         quantity: { type: Number, required: true, min: 1 },
       },
     ],
+    total: { type: Number, required: true },
     contact: {
       name: { type: String, required: true },
       address: { type: String, required: true },
