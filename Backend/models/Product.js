@@ -6,6 +6,9 @@ const productSchema = new mongoose.Schema(
     price: { type: Number, required: true },
     description: { type: String, required: true },
     stock: { type: Number, required: true, default: 0 },
+    imageUrl: { type: String, required: true }, // Cloudinary/local URL
+    category: { type: String },
+    brand: { type: String },
   },
   { timestamps: true }
 );
