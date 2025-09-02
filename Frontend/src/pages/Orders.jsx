@@ -40,6 +40,27 @@ const Order = () => {
   if (loadingOrders) return <p>Loading your orders...</p>;
   if (error) return <p style={{ color: "red" }}>Error: {error}</p>;
 
+    const handleDelete = async (orderId) => {
+    const confirmed = window.confirm("Are you sure you want to delete this order?");
+    if (!confirmed) return;
+
+    try {
+        const token = await getAccessTokenSilently();
+        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/orders/${orderId}`, {
+        method: "DELETE",
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+        });
+
+        if (!res.ok) throw new Error("Failed to Cancel order");
+
+        setOrders((prev) => prev.filter((order) => order._id !== orderId));
+    } catch (err) {
+        setError(err.message);
+    }
+    };
+
   return (
     <div style={{ padding: "1rem" }}>
       <h2>My Orders</h2>
@@ -61,6 +82,16 @@ const Order = () => {
               </ul>
               <p><strong>Total:</strong> ${order.total}</p>
               <p><strong>Delivery:</strong> {order.delivery?.date} ({order.delivery?.paymentMethod})</p>
+              {order.status === "pending" && (
+                <div style={{ marginTop: "1rem" }}>
+                    <button
+                        onClick={() => handleDelete(order._id)}
+                        style={{ padding: "0.5rem 1rem", backgroundColor: "#dc3545", color: "#fff", border: "none", borderRadius: "4px" }}
+                    >
+                        Cancel Order
+                    </button>
+                </div>
+                )}
             </li>
           ))}
         </ul>

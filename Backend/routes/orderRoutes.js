@@ -2,6 +2,7 @@ import express from "express";
 import Order from "../models/Order.js";
 import { checkJwt } from "../middleware/authMiddleware.js";
 import { validateOrder } from "../middleware/validateMiddleware.js";
+import { checkOrderOwner } from "../middleware/checkOwner.js";
 
 const router = express.Router();
 
@@ -33,6 +34,18 @@ router.get("/orders", checkJwt, async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
+// DELETE /api/orders/:id → delete order (only if owner)
+router.delete("/:id", checkJwt, checkOrderOwner, async (req, res) => {
+  try {
+    await req.order.deleteOne();
+    res.json({ message: "Order deleted" });
+  } catch (err) {
+    console.error("Delete error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 
 
 export default router;
