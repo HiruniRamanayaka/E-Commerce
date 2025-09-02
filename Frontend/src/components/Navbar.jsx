@@ -20,6 +20,8 @@ const Navbar = () => {
       <div>
         {isAuthenticated ? (
           <>
+            <Link to="/orders">My Orders</Link>
+            <Link to="/profile">Profile</Link>
             <span style={{ marginRight: "1rem" }}>
               Hi, {user?.name || "User"}
             </span>
