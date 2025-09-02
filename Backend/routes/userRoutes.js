@@ -34,7 +34,7 @@ router.put("/profile", checkJwt, validateProfile, async (req, res) => {
       { auth0Id },
       {
         name: req.body.name,
-        email: req.body.email,
+        email: req.auth.email || req.body.email,
         phone: req.body.phone,
         address: req.body.address,
       },
