@@ -35,6 +35,30 @@ router.get("/orders", checkJwt, async (req, res) => {
   }
 });
 
+// GET /api/orders/:id → get single order (must be owner)
+router.get("/:id", checkJwt, checkOrderOwner, async (req, res) => {
+  res.json(req.order); // checkOrderOwner already attaches it
+});
+
+// PUT /api/orders/:id → update order status (admin use)
+router.put("/:id", checkJwt, async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    // For now, only status update allowed
+    order.status = req.body.status || order.status;
+    const updated = await order.save();
+
+    res.json(updated);
+  } catch (err) {
+    console.error("Order update error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 // DELETE /api/orders/:id → delete order (only if owner)
 router.delete("/:id", checkJwt, checkOrderOwner, async (req, res) => {
   try {
@@ -45,7 +69,5 @@ router.delete("/:id", checkJwt, checkOrderOwner, async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
-
-
 
 export default router;

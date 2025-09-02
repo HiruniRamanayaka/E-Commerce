@@ -37,6 +37,7 @@ router.put("/profile", checkJwt, validateProfile, async (req, res) => {
         email: req.auth.email || req.body.email,
         phone: req.body.phone,
         address: req.body.address,
+        country: req.body.country,
       },
       { new: true, upsert: true }
     );
@@ -47,5 +48,23 @@ router.put("/profile", checkJwt, validateProfile, async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
+// DELETE /api/users/profile → delete user profile data
+router.delete("/profile", checkJwt, async (req, res) => {
+  try {
+    const auth0Id = req.auth.sub;
+    const deleted = await User.findOneAndDelete({ auth0Id });
+
+    if (!deleted) {
+      return res.status(404).json({ message: "User profile not found" });
+    }
+
+    res.json({ message: "Profile deleted successfully" });
+  } catch (err) {
+    console.error("Profile delete error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 
 export default router;
