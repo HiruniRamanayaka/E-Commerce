@@ -7,15 +7,24 @@ const Checkout = () => {
   const { getAccessTokenSilently, isAuthenticated, user } = useAuth0();
   const navigate = useNavigate();
   const { cartItems, setCartItems } = useCart();
+
+  const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  
   const [form, setForm] = useState({
     name: "",
     address: "",
     phone: "",
     district: "",
     deliveryDate: "",
+    deliveryTime: "",
     paymentMethod: "Cash",
+    message: "",
   });
+
   const [message, setMessage] = useState("");
+
+  const districts = ["Colombo", "Gampaha", "Kandy", "Kurunegala", "Matara"];
+  const deliveryTimes = ["10 AM", "11 AM", "12 PM"];
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -24,7 +33,6 @@ const Checkout = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (cartItems.length === 0) return setMessage("Cart is empty");
-
     // Get token here
     let token = null;
     if (isAuthenticated) {
@@ -50,7 +58,9 @@ const Checkout = () => {
       },
       delivery: {
         date: new Date(form.deliveryDate),   // convert to Date
+        time: form.deliveryTime,
         paymentMethod: form.paymentMethod,
+        message: form.message,
       },
     };
 
@@ -64,19 +74,47 @@ const Checkout = () => {
         body: JSON.stringify(order),
       });
 
-      if (!res.ok) throw new Error("Failed to place order");
+      const createdOrder = await res.json();
 
-      setMessage("Order placed successfully!");
-      setCartItems([]); // clear cart
-      // setTimeout(() => navigate("/"), 1500); // 1.5 seconds delay then redirect to home
+      if (!res.ok) {
+        const errorData = await res.json(); // read error message
+        throw new Error(errorData.message || "Failed to place order");
+      }
+
+      if (form.paymentMethod === "Card") {
+        setCartItems([]);
+        navigate("/payment", {
+          state: {
+            orderId: createdOrder._id,
+            total,
+          },
+        });
+      } else {
+        setMessage("Order placed successfully!");
+        setCartItems([]);
+      }
     } catch (err) {
       setMessage(err.message);
     }
   };
 
+  // Prevent selecting past dates or Sundays
+  const getMinDate = () => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return today.toISOString().slice(0, 16); // format for datetime-local
+  };
+
+  const isSunday = (dateStr) => {
+    const date = new Date(dateStr);
+    return date.getDay() === 0;
+  };
+
+
   return (
     <div>
       <h2>Checkout</h2>
+      <p><strong>Total to Pay:</strong> ${total.toFixed(2)}</p>
       <div>
         {message && <p>{message}</p>}
         {/* Show redirect button only after successful order */}
@@ -88,17 +126,54 @@ const Checkout = () => {
         <input name="name" placeholder="Name" onChange={handleChange} required />
         <input name="address" placeholder="Address" onChange={handleChange} required />
         <input name="phone" placeholder="Phone" onChange={handleChange} required />
-        <input name="district" placeholder="District" onChange={handleChange} required />
+        
+        <select name="district" onChange={handleChange} required>
+          <option value="">Select District</option>
+          {districts.map((d) => (
+            <option key={d} value={d}>{d}</option>
+          ))}
+        </select>
+
         <input
           type="datetime-local"
           name="deliveryDate"
-          onChange={handleChange}
+          onChange={(e) => {
+            if (isSunday(e.target.value)) {
+              setMessage("Delivery cannot be scheduled on Sundays.");
+              setForm({ ...form, deliveryDate: "" });
+            } else {
+              setMessage("");
+              handleChange(e);
+            }
+          }}
+          min={getMinDate()}
           required
         />
+
+        <select name="deliveryTime" onChange={handleChange} required>
+          <option value="">Select Delivery Time</option>
+          {deliveryTimes.map((t) => (
+            <option key={t} value={t}>{t}</option>
+          ))}
+        </select>
+
         <select name="paymentMethod" onChange={handleChange} required>
           <option value="Cash">Cash</option>
           <option value="Card">Card</option>
         </select>
+
+        <textarea
+          name="message"
+          placeholder="Delivery instructions (optional)"
+          onChange={handleChange}
+        />
+
+        {form.paymentMethod === "Card" && (
+          <p style={{ color: "#856404", backgroundColor: "#fff3cd", padding: "0.5rem" }}>
+            You’ll be redirected to a secure payment page after placing your order.
+          </p>
+        )}
+
         <button type="submit">Place Order</button>
       </form>
     </div>

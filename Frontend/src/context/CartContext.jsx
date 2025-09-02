@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 
 const CartContext = createContext();
 
@@ -7,32 +7,67 @@ export const useCart = () => useContext(CartContext);
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
 
+  // Load cart from localStorage on first render
+  useEffect(() => {
+    const storedCart = localStorage.getItem("cartItems");
+    if (storedCart) {
+      setCartItems(JSON.parse(storedCart));
+    }
+  }, []);
+
+  const persistCart = (items) => {
+    localStorage.setItem("cartItems", JSON.stringify(items));
+  };
+
   const addToCart = (product) => {
     setCartItems((prev) => {
-      const existing = prev.find((item) => item._id === product._id); // use _id
+      const existing = prev.find((item) => item._id === product._id);
+      let updatedCart;
       if (existing) {
-        return prev.map((item) =>
+        updatedCart = prev.map((item) =>
           item._id === product._id ? { ...item, quantity: item.quantity + 1 } : item
         );
+      } else {
+        updatedCart = [...prev, { ...product, quantity: 1 }];
       }
-      return [...prev, { ...product, quantity: 1 }];
+      persistCart(updatedCart); // ✅ Save immediately
+      return updatedCart;
     });
   };
 
   const removeFromCart = (productId) => {
-    setCartItems((prev) =>
-      prev
+    setCartItems((prev) => {
+      const updatedCart = prev
         .map((item) =>
           item._id === productId ? { ...item, quantity: item.quantity - 1 } : item
         )
-        .filter((item) => item.quantity > 0)
-    );
+        .filter((item) => item.quantity > 0);
+      persistCart(updatedCart); // ✅ Save immediately
+      return updatedCart;
+    });
+  };
+
+  const deleteFromCart = (productId) => {
+    setCartItems((prev) => {
+      const updatedCart = prev.filter((item) => item._id !== productId);
+      persistCart(updatedCart); // ✅ Save immediately
+      return updatedCart;
+    });
   };
 
   const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
-    <CartContext.Provider value={{ cartItems, addToCart, removeFromCart, cartCount, setCartItems }}>
+    <CartContext.Provider
+      value={{
+        cartItems,
+        addToCart,
+        removeFromCart,
+        deleteFromCart,
+        cartCount,
+        setCartItems,
+      }}
+    >
       {children}
     </CartContext.Provider>
   );
