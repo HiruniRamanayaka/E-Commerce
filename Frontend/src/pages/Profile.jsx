@@ -8,6 +8,7 @@ const Profile = () => {
     email: "",
     phone: "",
     address: "",
+    country: "",
   });
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [messages, setMessages] = useState([]);
@@ -28,6 +29,7 @@ const Profile = () => {
             email: user?.email || "",
             phone: "",
             address: "",
+            country: "",
           });
           return;
         }
@@ -38,6 +40,7 @@ const Profile = () => {
           email: data.email ?? user?.email ?? "",
           phone: data.phone ?? "",
           address: data.address ?? "",
+          country: data.country ?? "",
         });
       } catch (err) {
         console.error(err);
@@ -61,6 +64,7 @@ const Profile = () => {
     if (!profile.email.trim()) errors.push("Email is required.");
     if (profile.phone && !/^\d{10,15}$/.test(profile.phone)) errors.push("Phone number must be 10–15 digits.");
     if (profile.address && profile.address.length > 200) errors.push("Address is too long.");
+    if (!profile.country.trim()) errors.push("Country is required.");
 
     if (errors.length > 0) {
       setMessages(errors);
@@ -135,6 +139,10 @@ const Profile = () => {
         <div>
           <label>Address:</label>
           <input name="address" value={profile.address ?? ""} onChange={handleChange} />
+        </div>
+        <div>
+          <label>Country:</label>
+          <input name="country" value={profile.country ?? ""} onChange={handleChange} />
         </div>
         <button type="submit">Update Profile</button>
       </form>
