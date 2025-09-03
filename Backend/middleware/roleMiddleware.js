@@ -2,7 +2,7 @@
 export const checkAdmin = (req, res, next) => {
   try {
     // Auth0 puts roles in req.auth['https://your-domain/roles'] if configured
-    const roles = req.auth["https://ecommerce-api/roles"] || [];
+    const roles = req.auth[process.env.AUTH0_ROLES_NAMESPACE] || [];
 
     if (roles.includes("admin")) {
       return next();

@@ -77,7 +77,6 @@ const Checkout = () => {
       const createdOrder = await res.json();
 
       if (!res.ok) {
-        const errorData = await res.json(); // read error message
         throw new Error(errorData.message || "Failed to place order");
       }
 

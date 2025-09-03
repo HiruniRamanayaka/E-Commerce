@@ -9,11 +9,11 @@ import "./index.css";
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <Auth0Provider
-      domain="dev-u8s4p8uj6dw7435p.us.auth0.com"
-      clientId="Ckzdvhwm4MbwAHp2GkMA1XuTqv1L7FhA"
+      domain={import.meta.env.VITE_AUTH0_DOMAIN}
+      clientId={import.meta.env.VITE_AUTH0_CLIENT_ID}
       authorizationParams={{
         redirect_uri: window.location.origin,
-        audience: "https://ecommerce-api", // same as API identifier
+        audience: import.meta.env.VITE_AUTH0_AUDIENCE, // same as API identifier
       }}
     >
       <CartProvider>

@@ -4,6 +4,7 @@ import { checkJwt } from "../middleware/authMiddleware.js";
 import { validateProfile } from "../middleware/validateMiddleware.js";
 
 const router = express.Router();
+const namespace = process.env.AUTH0_ROLES_NAMESPACE;
 
 // GET /api/users/profile → fetch or create user profile
 router.get("/profile", checkJwt, async (req, res) => {
@@ -14,7 +15,7 @@ router.get("/profile", checkJwt, async (req, res) => {
     if (!user) {
       user = await User.create({
         auth0Id,
-        name: req.auth.name,
+        name: req.auth.name || "",
         email: req.auth.email,
         phone: req.auth[`${namespace}phone`] || "",
         address: req.auth.address || "",

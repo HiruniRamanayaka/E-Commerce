@@ -36,9 +36,9 @@ const Cart = () => {
           <div>
             <h3>{item.name}</h3>
             <p>Qty: {item.quantity}</p>
-            <button onClick={() => addToCart(item)}>+</button>
-            <button onClick={() => removeFromCart(item._id)}  disabled={item.quantity <= 1}>-</button>
-            <button onClick={() => handleDelete(item._id)} style={{ color: "red" }}>Remove From Cart</button>
+            <button onClick={() => addToCart(item)} disabled={!isAuthenticated} >+</button>
+            <button onClick={() => removeFromCart(item._id)}  disabled={!isAuthenticated || item.quantity <= 1}>-</button>
+            <button onClick={() => handleDelete(item._id)} disabled={!isAuthenticated} style={{ color: "red" }}>Remove From Cart</button>
           </div>
         </div>
       ))}

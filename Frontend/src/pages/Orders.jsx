@@ -11,7 +11,7 @@ const Order = () => {
     const fetchOrders = async () => {
       try {
         const token = await getAccessTokenSilently();
-        const res = await fetch("http://localhost:4000/api/orders/orders", {
+        const res = await fetch((`${import.meta.env.VITE_API_BASE_URL}/api/orders/orders`), {
           headers: {
             Authorization: `Bearer ${token}`,
           },
