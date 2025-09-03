@@ -16,6 +16,9 @@ router.get("/profile", checkJwt, async (req, res) => {
         auth0Id,
         name: req.auth.name,
         email: req.auth.email,
+        phone: req.auth[`${namespace}phone`] || "",
+        address: req.auth.address || "",
+        country: req.auth[`${namespace}country`] || "",
       });
     }
 
@@ -39,13 +42,13 @@ router.put("/profile", checkJwt, validateProfile, async (req, res) => {
         address: req.body.address,
         country: req.body.country,
       },
-      { new: true, upsert: true }
+      { new: true }
     );
 
     res.json(updated);
   } catch (err) {
     console.error("Profile update error:", err);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "Unexpected error", details: err.message });
   }
 });
 

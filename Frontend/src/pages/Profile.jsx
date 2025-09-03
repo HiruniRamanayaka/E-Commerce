@@ -24,12 +24,13 @@ const Profile = () => {
         });
 
         if (!res.ok) {
+          const customClaims = user || {};
           setProfile({
-            name: user?.name || "",
+            name: customClaims["http://localhost:5173/username"] || user?.name || "",
             email: user?.email || "",
-            phone: "",
+            phone: customClaims["http://localhost:5173/phone"] || "",
             address: "",
-            country: "",
+            country: customClaims["http://localhost:5173/country"] || "",
           });
           return;
         }
