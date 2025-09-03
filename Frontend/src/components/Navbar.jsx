@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom"; 
 import { useCart } from "../context/CartContext.jsx";
 import { LoginButton } from "./LoginButton.jsx";
+import { SignupButton } from "./SignupButton.jsx";
 import { LogoutButton } from "./LogoutButton.jsx";
 import { useAuth0 } from "@auth0/auth0-react";
 
@@ -28,7 +29,10 @@ const Navbar = () => {
             <LogoutButton />
           </>
         ) : (
-          <LoginButton />
+          <>
+            <LoginButton />
+            <SignupButton />
+          </>
         )}
       </div>
     </nav>
