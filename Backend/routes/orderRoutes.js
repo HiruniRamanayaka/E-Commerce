@@ -13,7 +13,6 @@ router.post("/", checkJwt, validateOrder, async (req, res) => {
     const total = req.body.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
     const order = await Order.create({
       ...req.body,
-      owner: req.auth.sub, // store user id from token
       total,
     });
     res.status(201).json(order);
@@ -24,7 +23,7 @@ router.post("/", checkJwt, validateOrder, async (req, res) => {
 });
 
 // Get orders for logged-in user
-router.get("/orders", checkJwt, async (req, res) => {
+router.get("/", checkJwt, async (req, res) => {
   try {
     const auth0Id = req.auth.sub;
     const orders = await Order.find({ owner: auth0Id }).sort({ createdAt: -1 });

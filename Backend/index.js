@@ -1,5 +1,6 @@
-import express from "express";
 import dotenv from "dotenv";
+dotenv.config();
+import express from "express";
 import connectDB from "./config/db.js";
 import cors from "cors";
 
@@ -8,7 +9,6 @@ import productRoutes from "./routes/productRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
 
-dotenv.config();
 connectDB();
 
 const app = express();
@@ -17,7 +17,7 @@ app.use(express.json());
 
 app.use(
   cors({
-    origin: "http://localhost:5173", // Vite dev server port
+    origin: [process.env.FRONTEND_URL, "http://localhost:5173"], // Vite dev server port
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })

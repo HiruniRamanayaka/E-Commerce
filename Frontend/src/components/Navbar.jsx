@@ -15,7 +15,7 @@ const Navbar = () => {
       <div>
         <h1>My Shop</h1>
         <Link to="/">Home</Link>{" | "}
-        <Link to="/cart">Cart ({cartCount})</Link>
+        <Link to="/cart">Cart {cartCount > 0 ? ` (${cartCount})` : ""}</Link>
       </div>
 
       <div>
@@ -24,7 +24,7 @@ const Navbar = () => {
             <Link to="/orders">My Orders</Link>
             <Link to="/profile">Profile</Link>
             <span style={{ marginRight: "1rem" }}>
-              Hi, {user?.name || "User"}
+              Hi, {user?.email || "User"}
             </span>
             <LogoutButton />
           </>

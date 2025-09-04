@@ -4,7 +4,6 @@ import { checkJwt } from "../middleware/authMiddleware.js";
 import { validateProfile } from "../middleware/validateMiddleware.js";
 
 const router = express.Router();
-const namespace = process.env.AUTH0_ROLES_NAMESPACE;
 
 // GET /api/users/profile → fetch or create user profile
 router.get("/profile", checkJwt, async (req, res) => {
@@ -17,9 +16,9 @@ router.get("/profile", checkJwt, async (req, res) => {
         auth0Id,
         name: req.auth.name || "",
         email: req.auth.email,
-        phone: req.auth[`${namespace}phone`] || "",
-        address: req.auth.address || "",
-        country: req.auth[`${namespace}country`] || "",
+        phone: "",
+        address: "",
+        country: "",
       });
     }
 
@@ -43,7 +42,7 @@ router.put("/profile", checkJwt, validateProfile, async (req, res) => {
         address: req.body.address,
         country: req.body.country,
       },
-      { new: true }
+      { new: true, upsert: true }
     );
 
     res.json(updated);

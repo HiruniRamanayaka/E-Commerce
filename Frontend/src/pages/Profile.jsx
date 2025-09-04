@@ -13,45 +13,45 @@ const Profile = () => {
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [messages, setMessages] = useState([]);
 
+  // Fetch profile from DB; if first visit, merge Auth0 claims
   useEffect(() => {
-    const fetchProfile = async () => {
-      if (!isAuthenticated) return;
+    if (!isAuthenticated) return;
 
+    const fetchProfile = async () => {
       try {
-        const token = await getAccessTokenSilently();
+        const token = await getAccessTokenSilently({
+          audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+        });
+
         const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/users/profile`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        if (!res.ok) {
-          const customClaims = user || {};
-          setProfile({
-            name: customClaims["http://localhost:5173/username"] || user?.name || "",
-            email: user?.email || "",
-            phone: customClaims["http://localhost:5173/phone"] || "",
-            address: "",
-            country: customClaims["http://localhost:5173/country"] || "",
-          });
-          return;
-        }
+        if (!res.ok) throw new Error("Failed to fetch profile");
 
         const data = await res.json();
+
+        // Merge custom claims only if DB doesn't already have values
+        const namespace = "https://ecommerce-api.com/";
+        const customClaims = user || {};
+
         setProfile({
-          name: data.name ?? user?.name ?? "",
-          email: data.email ?? user?.email ?? "",
-          phone: data.phone ?? "",
-          address: data.address ?? "",
-          country: data.country ?? "",
+          name: data.name || customClaims[`${namespace}username`] || user?.name || "",
+          email: data.email || user?.email || "",
+          phone: data.phone || customClaims[`${namespace}phone`] || "",
+          address: data.address || "",
+          country: data.country || customClaims[`${namespace}country`] || "",
         });
       } catch (err) {
-        console.error(err);
+        console.error("Profile fetch error:", err);
+        setMessages([err.message]);
       } finally {
         setLoadingProfile(false);
       }
     };
 
     fetchProfile();
-  }, [isAuthenticated, getAccessTokenSilently, user]);
+  }, [isAuthenticated, user, getAccessTokenSilently]);
 
   const handleChange = (e) => {
     setProfile({ ...profile, [e.target.name]: e.target.value });
@@ -59,21 +59,13 @@ const Profile = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const errors = [];
-
-    if (!profile.name.trim()) errors.push("Name is required.");
-    if (!profile.email.trim()) errors.push("Email is required.");
-    if (profile.phone && !/^\d{10,15}$/.test(profile.phone)) errors.push("Phone number must be 10–15 digits.");
-    if (profile.address && profile.address.length > 200) errors.push("Address is too long.");
-    if (!profile.country.trim()) errors.push("Country is required.");
-
-    if (errors.length > 0) {
-      setMessages(errors);
-      return;
-    }
+    setMessages([]);
 
     try {
-      const token = await getAccessTokenSilently();
+      const token = await getAccessTokenSilently({
+        audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+      });
+
       const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/users/profile`, {
         method: "PUT",
         headers: {
@@ -83,7 +75,10 @@ const Profile = () => {
         body: JSON.stringify(profile),
       });
 
-      if (!res.ok) throw new Error("Failed to update profile");
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.message || "Failed to update profile");
+      }
 
       const updated = await res.json();
       setProfile(updated);
@@ -93,6 +88,7 @@ const Profile = () => {
     }
   };
 
+  // Clear messages after 4 seconds
   useEffect(() => {
     if (messages.length > 0) {
       const timer = setTimeout(() => setMessages([]), 4000);
@@ -106,8 +102,9 @@ const Profile = () => {
   const isSuccess = messages[0]?.includes("successfully");
 
   return (
-    <div>
+    <div style={{ maxWidth: "400px", margin: "2rem auto", fontFamily: "Arial, sans-serif" }}>
       <h3>Profile</h3>
+
       {messages.length > 0 && (
         <ul
           style={{
@@ -124,28 +121,62 @@ const Profile = () => {
           ))}
         </ul>
       )}
+
       <form onSubmit={handleSubmit}>
-        <div>
+        <div style={{ marginBottom: "0.5rem" }}>
           <label>Name:</label>
-          <input name="name" value={profile.name ?? ""} onChange={handleChange} required />
+          <input
+            name="name"
+            value={profile.name}
+            onChange={handleChange}
+            required
+            style={{ width: "100%", padding: "0.5rem", marginTop: "0.25rem" }}
+          />
         </div>
-        <div>
+
+        <div style={{ marginBottom: "0.5rem" }}>
           <label>Email:</label>
-          <input name="email" value={profile.email ?? ""} onChange={handleChange} required readOnly />
+          <input
+            name="email"
+            value={profile.email}
+            readOnly
+            style={{ width: "100%", padding: "0.5rem", marginTop: "0.25rem", backgroundColor: "#f0f0f0" }}
+          />
         </div>
-        <div>
+
+        <div style={{ marginBottom: "0.5rem" }}>
           <label>Phone:</label>
-          <input name="phone" value={profile.phone ?? ""} onChange={handleChange} />
+          <input
+            name="phone"
+            value={profile.phone}
+            onChange={handleChange}
+            style={{ width: "100%", padding: "0.5rem", marginTop: "0.25rem" }}
+          />
         </div>
-        <div>
+
+        <div style={{ marginBottom: "0.5rem" }}>
           <label>Address:</label>
-          <input name="address" value={profile.address ?? ""} onChange={handleChange} />
+          <input
+            name="address"
+            value={profile.address}
+            onChange={handleChange}
+            style={{ width: "100%", padding: "0.5rem", marginTop: "0.25rem" }}
+          />
         </div>
-        <div>
+
+        <div style={{ marginBottom: "0.5rem" }}>
           <label>Country:</label>
-          <input name="country" value={profile.country ?? ""} onChange={handleChange} />
+          <input
+            name="country"
+            value={profile.country}
+            onChange={handleChange}
+            style={{ width: "100%", padding: "0.5rem", marginTop: "0.25rem" }}
+          />
         </div>
-        <button type="submit">Update Profile</button>
+
+        <button type="submit" style={{ padding: "0.5rem 1rem", marginTop: "1rem" }}>
+          Save Profile
+        </button>
       </form>
     </div>
   );

@@ -9,7 +9,7 @@ router.get("/", async (req, res) => {
     const products = await Product.find({});
     res.json(products);
   } catch (err) {
-    res.status(500).json({ message: "Server Error" });
+    res.status(500).json({ error: err.message });
   }
 });
 
@@ -22,7 +22,7 @@ router.get("/:id", async (req, res) => {
     }
     res.json(product);
   } catch (err) {
-    res.status(500).json({ message: "Server Error" });
+    res.status(500).json({ error: err.message });
   }
 });
 
@@ -44,7 +44,7 @@ router.post("/", async (req, res) => {
     const savedProduct = await newProduct.save();
     res.status(201).json(savedProduct);
   } catch (err) {
-    res.status(500).json({ message: "Server Error" });
+    res.status(500).json({ error: err.message });
   }
 });
 

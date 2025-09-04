@@ -24,6 +24,7 @@ const Home = () => {
 
   return (
     <div style={{ display: "flex", flexWrap: "wrap" }}>
+      {console.log(import.meta.env)};
       {products.map((p) => (
         <ProductCard key={p._id} product={p} onAdd={handleAddToCart} />
       ))}
