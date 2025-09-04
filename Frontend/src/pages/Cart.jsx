@@ -35,6 +35,7 @@ const Cart = () => {
           <img src={item.imageUrl} alt={item.name} style={{ width: "80px" }} />
           <div>
             <h3>{item.name}</h3>
+            <p>Price: {item.price}</p>
             <p>Qty: {item.quantity}</p>
             <button onClick={() => handleAdd(item)} disabled={!isAuthenticated} >+</button>
             <button onClick={() => removeFromCart(item._id)}  disabled={!isAuthenticated || item.quantity <= 1}>-</button>

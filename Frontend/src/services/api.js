@@ -1,36 +1,87 @@
-// src/services/api.js
-const API_BASE = import.meta.env.VITE_API_BASE_URL;
+import api from "./axios.js"; // the axios instance
+import { useAuth0 } from "@auth0/auth0-react";
 
-// export const getProducts = async () => {
-//   const res = await fetch(`${API_BASE}/api/products`);
-//   if (!res.ok) throw new Error("Failed to fetch products");
-//   return res.json();
-// };
+// Hook to use API calls with Auth0 token
+export const useApi = () => {
+  const { getAccessTokenSilently } = useAuth0();
 
-export const getProductById = async (id) => {
-  const res = await fetch(`${API_BASE}/api/products/${id}`);
-  if (!res.ok) throw new Error("Failed to fetch product");
-  return res.json();
+  const withToken = async (callback) => {
+    const token = await getAccessTokenSilently();
+    return callback(token);
+  };
+
+  const getProducts = async () => {
+    const res = await api.get("/api/products");
+    return res.data;
+  };
+
+  const getProductById = async (id) => {
+    const res = await api.get(`/api/products/${id}`);
+    return res.data;
+  };
+
+  const getOrders = async () => {
+    return withToken(async (token) => {
+      const res = await api.get("/api/orders", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return res.data;
+    });
+  };
+
+  const cancelOrder = async (orderId) => {
+    return withToken(async (token) => {
+      const res = await api.delete(`/api/orders/${orderId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return res.data;
+    });
+  };
+
+  const getProfile = async () => {
+    return withToken(async (token) => {
+      const res = await api.get("/api/users/profile", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return res.data;
+    });
+  };
+
+  const updateProfile = async (profile) => {
+    return withToken(async (token) => {
+      const res = await api.put("/api/users/profile", profile, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return res.data;
+    });
+  };
+
+  const initiatePayment = async (orderId) => {
+    return withToken(async (token) => {
+      const res = await api.post(
+        "/api/payments/initiate",
+        { orderId },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      return res.data;
+    });
+  };
+
+  const createOrder = async (order, token) => {
+    const res = await api.post("/api/orders", order, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return res.data;
+  };
+
+  return {
+    getProducts,
+    getProductById,
+    getOrders,
+    cancelOrder,
+    getProfile,
+    updateProfile,
+    initiatePayment,
+    createOrder,
+  };
 };
-
-// export const createOrder = async (order, token) => {
-//   const res = await fetch(`${API_BASE}/api/orders`, {
-//     method: "POST",
-//     headers: {
-//       "Content-Type": "application/json",
-//       Authorization: `Bearer ${token}`,
-//     },
-//     body: JSON.stringify(order),
-//   });
-//   if (!res.ok) throw new Error("Failed to place order");
-//   return res.json();
-// };
-
-// export const getOrders = async (token) => {
-//   const res = await fetch(`${API_BASE}/api/orders`, {
-//     headers: { Authorization: `Bearer ${token}` },
-//   });
-//   if (!res.ok) throw new Error("Failed to fetch orders");
-//   return res.json();
-// };
-

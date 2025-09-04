@@ -1,40 +1,38 @@
 import React, { useEffect, useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
-import api from "../services/axios.js";
+import { useApi } from "../services/api.js";
 
 const Order = () => {
-  const { getAccessTokenSilently, isAuthenticated, isLoading } = useAuth0();
+  const { isAuthenticated, isLoading } = useAuth0();
+  const { getOrders, cancelOrder } = useApi();
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
+    if (!isAuthenticated) return;
+
     const fetchOrders = async () => {
       try {
-        const token = await getAccessTokenSilently();
-        const res = await api.get("/api/orders", {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setOrders(res.data);
+        const data = await getOrders();
+        setOrders(data);
       } catch (err) {
-        setError(err.response?.data?.message || err.message);
+        setError(err.message);
       } finally {
         setLoadingOrders(false);
       }
     };
-    if (isAuthenticated) {
-      fetchOrders();
-    }
-  }, [getAccessTokenSilently, isAuthenticated]);
+
+    fetchOrders();
+  }, [isAuthenticated]);
 
   const handleDelete = async (orderId) => {
     if (!window.confirm("Are you sure you want to delete this order?")) return;
     try {
-      const token = await getAccessTokenSilently();
-      await api.delete(`/api/orders/${orderId}`, { headers: { Authorization: `Bearer ${token}` } });
-      setOrders((prev) => prev.filter(o => o._id !== orderId));
+      await cancelOrder(orderId);
+      setOrders((prev) => prev.filter((o) => o._id !== orderId));
     } catch (err) {
-      setError(err.response?.data?.message || err.message);
+      setError(err.message);
     }
   };
 

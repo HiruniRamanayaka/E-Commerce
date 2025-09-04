@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
-import api from "../services/axios.js";
+import { useApi } from "../services/api.js";
 
 const Profile = () => {
   const { user, isAuthenticated, isLoading, getAccessTokenSilently } = useAuth0();
+  const { getProfile, updateProfile } = useApi();
   const [profile, setProfile] = useState({
     name: "",
     email: "",
@@ -20,15 +21,7 @@ const Profile = () => {
       if (!isAuthenticated) return;
 
       try {
-        const token = await getAccessTokenSilently({
-          audience: import.meta.env.VITE_AUTH0_AUDIENCE,
-        });
-
-        const res = await api.get("/api/users/profile", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        const data = res.data;
+        const data = await getProfile();
 
         // Merge custom claims only if DB doesn't already have values
         const namespace = "https://ecommerce-api.com/";
@@ -50,7 +43,7 @@ const Profile = () => {
     };
 
     fetchProfile();
-  }, [isAuthenticated, user, getAccessTokenSilently]);
+  }, [isAuthenticated, user]);
 
   const handleChange = (e) => {
     setProfile({ ...profile, [e.target.name]: e.target.value });
@@ -74,19 +67,11 @@ const Profile = () => {
     }
 
     try {
-      const token = await getAccessTokenSilently({
-        audience: import.meta.env.VITE_AUTH0_AUDIENCE,
-      });
-
-      const res = await api.put("/api/users/profile", profile, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      setProfile(res.data);
+      const updated = await updateProfile(profile);
+      setProfile(updated);
       setMessages(["Profile updated successfully!"]);
     } catch (err) {
-      const msg = err.response?.data?.message || err.message;
-      setMessages([msg]);
+      setMessages([err.message]);
     }
   };
 

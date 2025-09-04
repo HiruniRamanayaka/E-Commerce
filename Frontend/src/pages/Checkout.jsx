@@ -2,12 +2,13 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext.jsx";
 import { useAuth0 } from "@auth0/auth0-react";
-import api from "../services/axios.js";
+import { useApi } from "../services/api.js";
 
 const Checkout = () => {
-  const { getAccessTokenSilently, isAuthenticated, user } = useAuth0();
-  const navigate = useNavigate();
+  const { getAccessTokenSilently, isAuthenticated, user, loginWithRedirect } = useAuth0();
   const { cartItems, setCartItems } = useCart();
+  const { createOrder } = useApi();
+  const navigate = useNavigate();
 
   const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
   
@@ -33,40 +34,39 @@ const Checkout = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!isAuthenticated) return loginWithRedirect();
     if (cartItems.length === 0) return setMessage("Cart is empty");
     
-    try {
-      const token = await getAccessTokenSilently();
-      const order = {
-        owner: user?.sub,
-        items: cartItems.map((item) => ({
-          productId: item._id,
-          name: item.name,
-          price: item.price,
-          quantity: item.quantity,
-        })),
-        contact: {
-          name: form.name,
-          address: form.address,
-          phone: form.phone,
-          district: form.district,
-        },
-        delivery: {
-          date: new Date(form.deliveryDate),   // convert to Date
-          time: form.deliveryTime,
-          paymentMethod: form.paymentMethod,
-          message: form.message,
-        },
-      };
+    const token = await getAccessTokenSilently();
+    const order = {
+      owner: user?.sub,
+      items: cartItems.map((item) => ({
+        productId: item._id,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+      })),
+      contact: {
+        name: form.name,
+        address: form.address,
+        phone: form.phone,
+        district: form.district,
+      },
+      delivery: {
+        date: new Date(form.deliveryDate),   // convert to Date
+        time: form.deliveryTime,
+        paymentMethod: form.paymentMethod,
+        message: form.message,
+      },
+    };
 
-      const res = await api.post("/api/orders", order, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+    try {
+      const createdOrder = await createOrder(order, token);
 
       if (form.paymentMethod === "Card") {
         setCartItems([]);
         navigate("/payment", { state: { 
-          orderId: res.data._id, 
+          orderId: createdOrder._id, 
           total 
         } });
       } else {
@@ -102,17 +102,20 @@ const Checkout = () => {
         )}
       </div>
       <form onSubmit={handleSubmit}>
+        <label>Name: </label>
         <input name="name" placeholder="Name" onChange={handleChange} required />
+        <label>Address</label>
         <input name="address" placeholder="Address" onChange={handleChange} required />
+        <label>Phone</label>
         <input name="phone" placeholder="Phone" onChange={handleChange} required />
-        
+        <label>District: </label>
         <select name="district" onChange={handleChange} required>
           <option value="">Select District</option>
           {districts.map((d) => (
             <option key={d} value={d}>{d}</option>
           ))}
         </select>
-
+        <label>Date of purchase: </label>
         <input
           type="datetime-local"
           name="deliveryDate"
@@ -128,19 +131,19 @@ const Checkout = () => {
           min={getMinDate()}
           required
         />
-
+        <label>Preferred Delivery Time: </label>
         <select name="deliveryTime" onChange={handleChange} required>
           <option value="">Select Delivery Time</option>
           {deliveryTimes.map((t) => (
             <option key={t} value={t}>{t}</option>
           ))}
         </select>
-
+        <label>Payment Method: </label>
         <select name="paymentMethod" onChange={handleChange} required>
           <option value="Cash">Cash</option>
           <option value="Card">Card</option>
         </select>
-
+        <label>Message: </label>
         <textarea
           name="message"
           placeholder="Delivery instructions (optional)"

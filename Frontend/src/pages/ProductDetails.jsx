@@ -1,27 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getProductById } from "../services/api";
 import { useCart } from "../context/CartContext";
 import { useAuth0 } from "@auth0/auth0-react";
-import api from "../services/axios.js";
+import { useApi } from "../services/api.js";
 
 const ProductDetails = () => {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
   const { addToCart } = useCart();
   const { isAuthenticated, loginWithRedirect } = useAuth0();
+  const { getProductById } = useApi();
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchProduct = async () => {
-      try {
-        const res = await api.get(`/api/products/${id}`);
-        setProduct(res.data);
-      } catch (err) {
-        console.error(err.response?.data?.message || err.message);
-      }
-    };
-    fetchProduct();
+    getProductById(id).then(setProduct).catch(console.error);
   }, [id]);
 
   if (!product) return <p>Loading...</p>;

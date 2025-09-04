@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
-import api from "../services/axios.js";
+import { useApi } from "../services/api.js";
 
 const Payment = () => {
-  const { isAuthenticated, getAccessTokenSilently } = useAuth0();
+  const { isAuthenticated } = useAuth0();
+  const { initiatePayment } = useApi();
   const location = useLocation();
   const navigate = useNavigate();
   const { orderId, total } = location.state || {};
@@ -17,15 +18,14 @@ const Payment = () => {
         return;
       }
       try {
-        const token = await getAccessTokenSilently();
-        const res = await api.post("/api/payments/initiate", { orderId }, { headers: { Authorization:`Bearer ${token}` } });
-        setMessage(res.data.message);
+        const data = await initiatePayment(orderId);
+        setMessage(data.message);
       } catch (err) {
-        setMessage(err.response?.data?.message || err.message);
+        setMessage(err.message);
       }
     };
     initiatePayment();
-  }, [isAuthenticated, orderId, getAccessTokenSilently]);
+  }, [isAuthenticated, orderId]);
 
   return (
     <div style={{ padding: "1rem" }}>
