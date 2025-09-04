@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import ProductCard from "../components/ProductCard.jsx";
 import { useCart } from "../context/CartContext.jsx";
+import api from "../services/axios.js";
 
 const Home = () => {
   const [products, setProducts] = useState([]);
@@ -10,9 +11,12 @@ const Home = () => {
 
   useEffect(() => {
     const fetchProducts = async () => {
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/products`);
-      const data = await res.json();
-      setProducts(data);
+      try {
+        const res = await api.get("/api/products");
+        setProducts(res.data);
+      } catch (err) {
+        console.error("Product fetch error:", err.message);
+      }
     };
     fetchProducts();
   }, []);
@@ -24,7 +28,6 @@ const Home = () => {
 
   return (
     <div style={{ display: "flex", flexWrap: "wrap" }}>
-      {console.log(import.meta.env)};
       {products.map((p) => (
         <ProductCard key={p._id} product={p} onAdd={handleAddToCart} />
       ))}

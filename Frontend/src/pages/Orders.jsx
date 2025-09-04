@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
+import api from "../services/axios.js";
 
 const Order = () => {
   const { getAccessTokenSilently, isAuthenticated, isLoading } = useAuth0();
@@ -11,55 +12,36 @@ const Order = () => {
     const fetchOrders = async () => {
       try {
         const token = await getAccessTokenSilently();
-        const res = await fetch((`${import.meta.env.VITE_API_BASE_URL}/api/orders`), {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+        const res = await api.get("/api/orders", {
+          headers: { Authorization: `Bearer ${token}` }
         });
-
-        if (!res.ok) {
-          throw new Error("Failed to fetch orders");
-        }
-
-        const data = await res.json();
-        setOrders(data);
+        setOrders(res.data);
       } catch (err) {
-        setError(err.message);
+        setError(err.response?.data?.message || err.message);
       } finally {
         setLoadingOrders(false);
       }
     };
-
     if (isAuthenticated) {
       fetchOrders();
     }
   }, [getAccessTokenSilently, isAuthenticated]);
 
+  const handleDelete = async (orderId) => {
+    if (!window.confirm("Are you sure you want to delete this order?")) return;
+    try {
+      const token = await getAccessTokenSilently();
+      await api.delete(`/api/orders/${orderId}`, { headers: { Authorization: `Bearer ${token}` } });
+      setOrders((prev) => prev.filter(o => o._id !== orderId));
+    } catch (err) {
+      setError(err.response?.data?.message || err.message);
+    }
+  };
+
   if (isLoading) return <p>Checking authentication...</p>;
   if (!isAuthenticated) return <p>Please log in to see your orders.</p>;
   if (loadingOrders) return <p>Loading your orders...</p>;
   if (error) return <p style={{ color: "red" }}>Error: {error}</p>;
-
-    const handleDelete = async (orderId) => {
-    const confirmed = window.confirm("Are you sure you want to delete this order?");
-    if (!confirmed) return;
-
-    try {
-        const token = await getAccessTokenSilently();
-        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/orders/${orderId}`, {
-        method: "DELETE",
-        headers: {
-            Authorization: `Bearer ${token}`,
-        },
-        });
-
-        if (!res.ok) throw new Error("Failed to Cancel order");
-
-        setOrders((prev) => prev.filter((order) => order._id !== orderId));
-    } catch (err) {
-        setError(err.message);
-    }
-    };
 
   return (
     <div style={{ padding: "1rem" }}>

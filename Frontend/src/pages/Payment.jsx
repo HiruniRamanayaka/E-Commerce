@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
+import api from "../services/axios.js";
 
 const Payment = () => {
   const { isAuthenticated, getAccessTokenSilently } = useAuth0();
@@ -15,26 +16,14 @@ const Payment = () => {
         setMessage("Unauthorized access.");
         return;
       }
-
       try {
         const token = await getAccessTokenSilently();
-        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/payments/initiate`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ orderId }),
-        });
-
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message);
-        setMessage(data.message);
+        const res = await api.post("/api/payments/initiate", { orderId }, { headers: { Authorization:`Bearer ${token}` } });
+        setMessage(res.data.message);
       } catch (err) {
-        setMessage(err.message);
+        setMessage(err.response?.data?.message || err.message);
       }
     };
-
     initiatePayment();
   }, [isAuthenticated, orderId, getAccessTokenSilently]);
 

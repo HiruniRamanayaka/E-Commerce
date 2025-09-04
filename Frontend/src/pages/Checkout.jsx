@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext.jsx";
 import { useAuth0 } from "@auth0/auth0-react";
+import api from "../services/axios.js";
 
 const Checkout = () => {
   const { getAccessTokenSilently, isAuthenticated, user } = useAuth0();
@@ -33,67 +34,47 @@ const Checkout = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (cartItems.length === 0) return setMessage("Cart is empty");
-    // Get token here
-    let token = null;
-    if (isAuthenticated) {
-      token = await getAccessTokenSilently();
-    } else {
-      setMessage("Please log in to place order");
-      return;
-    }
-
-    const order = {
-      owner: user?.sub,
-      items: cartItems.map((item) => ({
-        productId: item._id,
-        name: item.name,
-        price: item.price,
-        quantity: item.quantity,
-      })),
-      contact: {
-        name: form.name,
-        address: form.address,
-        phone: form.phone,
-        district: form.district,
-      },
-      delivery: {
-        date: new Date(form.deliveryDate),   // convert to Date
-        time: form.deliveryTime,
-        paymentMethod: form.paymentMethod,
-        message: form.message,
-      },
-    };
-
+    
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/orders`, {
-        method: "POST",
-        headers: { 
-            "Content-Type": "application/json", 
-            Authorization: `Bearer ${token}`,
+      const token = await getAccessTokenSilently();
+      const order = {
+        owner: user?.sub,
+        items: cartItems.map((item) => ({
+          productId: item._id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+        })),
+        contact: {
+          name: form.name,
+          address: form.address,
+          phone: form.phone,
+          district: form.district,
         },
-        body: JSON.stringify(order),
+        delivery: {
+          date: new Date(form.deliveryDate),   // convert to Date
+          time: form.deliveryTime,
+          paymentMethod: form.paymentMethod,
+          message: form.message,
+        },
+      };
+
+      const res = await api.post("/api/orders", order, {
+        headers: { Authorization: `Bearer ${token}` }
       });
-
-      const createdOrder = await res.json();
-
-      if (!res.ok) {
-        throw new Error(errorData.message || "Failed to place order");
-      }
 
       if (form.paymentMethod === "Card") {
         setCartItems([]);
-        navigate("/payment", {
-          state: {
-            orderId: createdOrder._id,
-            total,
-          },
-        });
+        navigate("/payment", { state: { 
+          orderId: res.data._id, 
+          total 
+        } });
       } else {
         setMessage("Order placed successfully!");
         setCartItems([]);
       }
     } catch (err) {
-      setMessage(err.message);
+        setMessage(err.response?.data?.message || err.message);
     }
   };
 
@@ -108,7 +89,6 @@ const Checkout = () => {
     const date = new Date(dateStr);
     return date.getDay() === 0;
   };
-
 
   return (
     <div>

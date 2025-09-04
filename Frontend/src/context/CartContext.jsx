@@ -42,7 +42,7 @@ export const CartProvider = ({ children }) => {
           item._id === productId ? { ...item, quantity: item.quantity - 1 } : item
         )
         .filter((item) => item.quantity > 0);
-      persistCart(updatedCart); // ✅ Save immediately
+      persistCart(updatedCart); // Save immediately
       return updatedCart;
     });
   };
@@ -50,7 +50,7 @@ export const CartProvider = ({ children }) => {
   const deleteFromCart = (productId) => {
     setCartItems((prev) => {
       const updatedCart = prev.filter((item) => item._id !== productId);
-      persistCart(updatedCart); // ✅ Save immediately
+      persistCart(updatedCart); // Save immediately
       return updatedCart;
     });
   };

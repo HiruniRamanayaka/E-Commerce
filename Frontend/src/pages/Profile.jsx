@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
+import api from "../services/axios.js";
 
 const Profile = () => {
   const { user, isAuthenticated, isLoading, getAccessTokenSilently } = useAuth0();
@@ -15,21 +16,19 @@ const Profile = () => {
 
   // Fetch profile from DB; if first visit, merge Auth0 claims
   useEffect(() => {
-    if (!isAuthenticated) return;
-
     const fetchProfile = async () => {
+      if (!isAuthenticated) return;
+
       try {
         const token = await getAccessTokenSilently({
           audience: import.meta.env.VITE_AUTH0_AUDIENCE,
         });
 
-        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/users/profile`, {
+        const res = await api.get("/api/users/profile", {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        if (!res.ok) throw new Error("Failed to fetch profile");
-
-        const data = await res.json();
+        const data = res.data;
 
         // Merge custom claims only if DB doesn't already have values
         const namespace = "https://ecommerce-api.com/";
@@ -61,30 +60,33 @@ const Profile = () => {
     e.preventDefault();
     setMessages([]);
 
+    const errors = [];
+
+    if (!profile.name.trim()) errors.push("Name is required.");
+    if (!profile.email.trim()) errors.push("Email is required.");
+    if (profile.phone && !/^\d{10,15}$/.test(profile.phone)) errors.push("Phone number must be 10–15 digits.");
+    if (profile.address && profile.address.length > 200) errors.push("Address is too long.");
+    if (!profile.country.trim()) errors.push("Country is required.");
+
+    if (errors.length > 0) {
+      setMessages(errors);
+      return;
+    }
+
     try {
       const token = await getAccessTokenSilently({
         audience: import.meta.env.VITE_AUTH0_AUDIENCE,
       });
 
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/users/profile`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(profile),
+      const res = await api.put("/api/users/profile", profile, {
+        headers: { Authorization: `Bearer ${token}` },
       });
 
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.message || "Failed to update profile");
-      }
-
-      const updated = await res.json();
-      setProfile(updated);
+      setProfile(res.data);
       setMessages(["Profile updated successfully!"]);
     } catch (err) {
-      setMessages([err.message]);
+      const msg = err.response?.data?.message || err.message;
+      setMessages([msg]);
     }
   };
 

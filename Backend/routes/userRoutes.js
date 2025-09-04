@@ -33,6 +33,10 @@ router.get("/profile", checkJwt, async (req, res) => {
 router.put("/profile", checkJwt, validateProfile, async (req, res) => {
   try {
     const auth0Id = req.auth.sub;
+    const existing = await User.findOne({ auth0Id });
+    if (!existing) {
+      return res.status(404).json({ message: "User profile not found" });
+    }
     const updated = await User.findOneAndUpdate(
       { auth0Id },
       {
