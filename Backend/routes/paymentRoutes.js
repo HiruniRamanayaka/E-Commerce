@@ -1,11 +1,12 @@
 import express from "express";
 import { checkJwt } from "../middleware/authMiddleware.js";
 import Order from "../models/Order.js";
+import { checkRole } from "../middleware/roleMiddleware.js";
 
 const router = express.Router();
 
 // POST /api/payments/initiate → mark order as awaiting payment
-router.post("/initiate", checkJwt, async (req, res) => {
+router.post("/initiate", checkJwt, checkRole(["user"]), async (req, res) => {
   try {
     const auth0Id = req.auth.sub;
     const { orderId } = req.body;
@@ -36,7 +37,7 @@ router.post("/initiate", checkJwt, async (req, res) => {
 });
 
 
-router.post("/confirm", checkJwt, async (req, res) => {
+router.post("/confirm", checkJwt, checkRole(["user"]), async (req, res) => {
   try {
     const { orderId, transactionId } = req.body;
     const order = await Order.findOne({ _id: orderId, owner: req.auth.sub });

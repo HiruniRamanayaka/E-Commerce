@@ -12,13 +12,27 @@ import paymentRoutes from "./routes/paymentRoutes.js";
 connectDB();
 
 const app = express();
-// Important: parse JSON bodies
-app.use(express.json());
 
+// SECURITY & MIDDLEWARE
+
+// Important: parse JSON bodies
+app.use(express.json({ limit: "10kb" }));
+
+// CORS (allow only frontend URLs)
+const allowedOrigins = [
+  process.env.FRONTEND_URL, // production frontend
+  "http://localhost:5173",   // local Vite dev
+];
 app.use(
   cors({
-    origin: [process.env.FRONTEND_URL, "http://localhost:5173"], // Vite dev server port
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("CORS not allowed"));
+      }
+    },
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
@@ -33,6 +47,12 @@ app.use("/api/users", userRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/payments", paymentRoutes);
+
+// GLOBAL ERROR HANDLER
+app.use((err, req, res, next) => {
+  console.error("Global error:", err);
+  res.status(500).json({ message: "Server error", error: err.message });
+});
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {

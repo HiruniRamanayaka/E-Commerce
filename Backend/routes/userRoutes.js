@@ -2,11 +2,12 @@ import express from "express";
 import User from "../models/User.js";
 import { checkJwt } from "../middleware/authMiddleware.js";
 import { validateProfile } from "../middleware/validateMiddleware.js";
+import { checkRole } from "../middleware/roleMiddleware.js";
 
 const router = express.Router();
 
 // GET /api/users/profile → fetch or create user profile
-router.get("/profile", checkJwt, async (req, res) => {
+router.get("/profile", checkJwt, checkRole(["user", "admin"]), async (req, res) => {
   try {
     const auth0Id = req.auth.sub; // consistent with orderRoutes
     let user = await User.findOne({ auth0Id });
@@ -21,7 +22,6 @@ router.get("/profile", checkJwt, async (req, res) => {
         country: "",
       });
     }
-
     res.json(user);
   } catch (err) {
     console.error("Profile fetch error:", err);
@@ -30,31 +30,34 @@ router.get("/profile", checkJwt, async (req, res) => {
 });
 
 // PUT /api/users/profile → update user profile
-router.put("/profile", checkJwt, validateProfile, async (req, res) => {
-  try {
-    const auth0Id = req.auth.sub;
-    const existing = await User.findOne({ auth0Id });
-    if (!existing) {
-      return res.status(404).json({ message: "User profile not found" });
-    }
-    const updated = await User.findOneAndUpdate(
-      { auth0Id },
-      {
-        name: req.body.name,
-        email: req.auth.email || req.body.email,
-        phone: req.body.phone,
-        address: req.body.address,
-        country: req.body.country,
-      },
-      { new: true, upsert: true }
-    );
+// router.put("/profile", checkJwt, validateProfile, async (req, res) => {
+//   try {
+//     const auth0Id = req.auth.sub;
+//     const existing = await User.findOne({ auth0Id });
+//     if (!existing) {
+//       return res.status(404).json({ message: "User profile not found" });
+//     }
+//     const updated = await User.findOneAndUpdate(
+//       { auth0Id },
+//       {
+//         name: req.body.name,
+//         email: req.auth.email || req.body.email,
+//         phone: req.body.phone,
+//         address: req.body.address,
+//         country: req.body.country,
+//       },
+//       { new: true, upsert: true }
+//     );
 
-    res.json(updated);
-  } catch (err) {
-    console.error("Profile update error:", err);
-    res.status(500).json({ message: "Unexpected error", details: err.message });
-  }
-});router.put("/profile", checkJwt, validateProfile, async (req, res) => {
+//     res.json(updated);
+//   } catch (err) {
+//     console.error("Profile update error:", err);
+//     res.status(500).json({ message: "Unexpected error", details: err.message });
+//   }
+// });
+
+
+router.put("/profile", checkJwt, checkRole(["user", "admin"]), validateProfile, async (req, res) => {
   try {
     const auth0Id = req.auth.sub;
     const existing = await User.findOne({ auth0Id });
@@ -86,7 +89,7 @@ router.put("/profile", checkJwt, validateProfile, async (req, res) => {
 });
 
 // DELETE /api/users/profile → delete user profile data
-router.delete("/profile", checkJwt, async (req, res) => {
+router.delete("/profile", checkJwt, checkRole(["user","admin"]), async (req, res) => {
   try {
     const auth0Id = req.auth.sub;
     const deleted = await User.findOneAndDelete({ auth0Id });
@@ -102,5 +105,27 @@ router.delete("/profile", checkJwt, async (req, res) => {
   }
 });
 
+// Admin: get all users
+router.get("/", checkJwt, checkRole(["admin"]), async (req, res) => {
+  try {
+    const users = await User.find({});
+    res.json(users);
+  } catch (err) {
+    console.error("Users fetch error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Admin: delete any user
+router.delete("/:id", checkJwt, checkRole(["admin"]), async (req, res) => {
+  try {
+    const deleted = await User.findByIdAndDelete(req.params.id);
+    if (!deleted) return res.status(404).json({ message: "User not found" });
+    res.json({ message: "User deleted" });
+  } catch (err) {
+    console.error("User delete error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
 export default router;

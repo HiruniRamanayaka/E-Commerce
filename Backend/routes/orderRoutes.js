@@ -3,12 +3,13 @@ import Order from "../models/Order.js";
 import Product from "../models/Product.js";
 import { checkJwt } from "../middleware/authMiddleware.js";
 import { validateOrder } from "../middleware/validateMiddleware.js";
+import { checkRole } from "../middleware/roleMiddleware.js";
 import { checkOrderOwner } from "../middleware/checkOwner.js";
 
 const router = express.Router();
 
 // POST /api/orders → create new order
-router.post("/", checkJwt, validateOrder, async (req, res) => {
+router.post("/", checkJwt, checkRole(["user"]), validateOrder, async (req, res) => {
   try {
     const auth0Id = req.auth.sub;
 
@@ -49,7 +50,7 @@ router.post("/", checkJwt, validateOrder, async (req, res) => {
 });
 
 // Get orders for logged-in user
-router.get("/", checkJwt, async (req, res) => {
+router.get("/", checkJwt, checkRole(["user"]), async (req, res) => {
   try {
     const auth0Id = req.auth.sub;
     const orders = await Order.find({ owner: auth0Id }).sort({ createdAt: -1 });
@@ -60,13 +61,36 @@ router.get("/", checkJwt, async (req, res) => {
   }
 });
 
-// GET /api/orders/:id → get single order (must be owner)
-router.get("/:id", checkJwt, checkOrderOwner, async (req, res) => {
-  res.json(req.order); // checkOrderOwner already attaches it
+// Admin: get all orders
+router.get("/all", checkJwt, checkRole(["admin"]), async (req, res) => {
+  try {
+    const orders = await Order.find({}).sort({ createdAt: -1 });
+    res.json(orders);
+  } catch (err) {
+    console.error("Orders fetch error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Get single order (owner or admin)
+router.get("/:id", checkJwt, checkRole(["user", "admin"]), async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) return res.status(404).json({ message: "Order not found" });
+
+    const roles = req.auth[process.env.AUTH0_ROLES_NAMESPACE] || [];
+    if (order.owner !== req.auth.sub && !roles.includes("admin"))
+      return res.status(403).json({ message: "Access denied" });
+
+    res.json(order);
+  } catch (err) {
+    console.error("Order fetch error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
 });
 
 // PUT /api/orders/:id → update order status (admin use)
-router.put("/:id", checkJwt, async (req, res) => {
+router.put("/:id", checkJwt, checkRole(["admin"]), async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
     if (!order) {
@@ -75,19 +99,26 @@ router.put("/:id", checkJwt, async (req, res) => {
 
     // For now, only status update allowed
     order.status = req.body.status || order.status;
-    const updated = await order.save();
-
-    res.json(updated);
+    if (req.body.paymentStatus) order.paymentStatus = req.body.paymentStatus;
+    await order.save();
+    res.json(order);
   } catch (err) {
     console.error("Order update error:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-// DELETE /api/orders/:id → delete order (only if owner)
-router.delete("/:id", checkJwt, checkOrderOwner, async (req, res) => {
+// DELETE /api/orders/:id → delete order (owner or admin)
+router.delete("/:id", checkJwt, checkRole(["user","admin"]), async (req, res) => {
   try {
-    await req.order.deleteOne();
+    const order = await Order.findById(req.params.id);
+    if (!order) return res.status(404).json({ message: "Order not found" });
+
+    const roles = req.auth[process.env.AUTH0_ROLES_NAMESPACE] || [];
+    if (order.owner !== req.auth.sub && !roles.includes("admin"))
+      return res.status(403).json({ message: "Access denied" });
+
+    await order.deleteOne();
     res.json({ message: "Order deleted" });
   } catch (err) {
     console.error("Delete error:", err);
