@@ -13,19 +13,17 @@ const Navbar = () => {
   return (
     <nav style={{ padding: "1rem", background: "#eee", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
       <div>
-        <h1>My Shop</h1>
-        <Link to="/">Home</Link>{" | "}
-        <Link to="/cart">Cart {cartCount > 0 ? ` (${cartCount})` : ""}</Link>
+        <h1 style={{ margin: 0 }}>My Shop</h1>
+        <Link to="/">Home</Link>
+        <Link to="/cart">Cart {cartCount > 0 ? `(${cartCount})` : ""}</Link>
+        {isAuthenticated && <Link to="/orders">My Orders</Link>}
+        {isAuthenticated && <Link to="/profile">Profile</Link>}
       </div>
 
       <div>
         {isAuthenticated ? (
           <>
-            <Link to="/orders">My Orders</Link>
-            <Link to="/profile">Profile</Link>
-            <span style={{ marginRight: "1rem" }}>
-              Hi, {user?.email || "User"}
-            </span>
+            <span style={{ marginRight: "1rem" }}>Hi, {user?.email || "User"}</span>
             <LogoutButton />
           </>
         ) : (

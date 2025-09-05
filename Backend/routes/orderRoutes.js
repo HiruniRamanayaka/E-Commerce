@@ -1,5 +1,6 @@
 import express from "express";
 import Order from "../models/Order.js";
+import Product from "../models/Product.js";
 import { checkJwt } from "../middleware/authMiddleware.js";
 import { validateOrder } from "../middleware/validateMiddleware.js";
 import { checkOrderOwner } from "../middleware/checkOwner.js";
@@ -8,17 +9,42 @@ const router = express.Router();
 
 // POST /api/orders → create new order
 router.post("/", checkJwt, validateOrder, async (req, res) => {
-  // console.log("Received order:", req.body);  // 🔹 log incoming request
   try {
-    const total = req.body.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const auth0Id = req.auth.sub;
+
+    // Re-fetch product details from DB to prevent tampering
+    const items = await Promise.all(
+      req.body.items.map(async (item) => {
+        const product = await Product.findById(item.productId);
+        if (!product) throw new Error(`Invalid product ID: ${item.productId}`);
+        if (typeof item.quantity !== "number" || item.quantity <= 0) {
+          throw new Error(`Invalid quantity for product ${item.productId}`);
+        }
+        return {
+          productId: product._id,
+          name: product.name,
+          price: product.price,
+          quantity: item.quantity,
+        };
+      })
+    );
+
+    const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
     const order = await Order.create({
-      ...req.body,
+      owner: auth0Id,
+      items,
       total,
+      contact: req.body.contact,
+      delivery: req.body.delivery,
+      status: "pending",
+      paymentStatus: "pending",
     });
+
     res.status(201).json(order);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Server error" });
+    console.error("Order creation error:", err);
+    res.status(400).json({ message: err.message });
   }
 });
 

@@ -43,7 +43,7 @@ const Cart = () => {
           </div>
         </div>
       ))}
-      <p><strong>Total:</strong> ${total}</p>
+      <p><strong>Total:</strong> ${total.toFixed(2)}</p>
       <button onClick={handleCheckout}>Proceed to Checkout</button>
     </div>
   );

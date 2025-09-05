@@ -54,6 +54,35 @@ router.put("/profile", checkJwt, validateProfile, async (req, res) => {
     console.error("Profile update error:", err);
     res.status(500).json({ message: "Unexpected error", details: err.message });
   }
+});router.put("/profile", checkJwt, validateProfile, async (req, res) => {
+  try {
+    const auth0Id = req.auth.sub;
+    const existing = await User.findOne({ auth0Id });
+
+    if (!existing) {
+      return res.status(404).json({ message: "User profile not found" });
+    }
+
+    const allowedFields = {
+      name: req.body.name,
+      phone: req.body.phone,
+      address: req.body.address,
+      country: req.body.country,
+      // email always from Auth0
+      email: req.auth.email || existing.email,
+    };
+
+    const updated = await User.findOneAndUpdate(
+      { auth0Id },
+      allowedFields,
+      { new: true }
+    );
+
+    res.json(updated);
+  } catch (err) {
+    console.error("Profile update error:", err);
+    res.status(500).json({ message: "Unexpected error", details: err.message });
+  }
 });
 
 // DELETE /api/users/profile → delete user profile data

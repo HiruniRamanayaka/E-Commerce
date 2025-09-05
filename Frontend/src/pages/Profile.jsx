@@ -67,8 +67,14 @@ const Profile = () => {
     }
 
     try {
-      const updated = await updateProfile(profile);
-      setProfile(updated);
+      const updated = await updateProfile({
+        name: profile.name,
+        phone: profile.phone,
+        address: profile.address,
+        country: profile.country,
+      });
+      // Keep email read-only from backend/auth0
+      setProfile({ ...updated, email: updated.email || profile.email });
       setMessages(["Profile updated successfully!"]);
     } catch (err) {
       setMessages([err.message]);

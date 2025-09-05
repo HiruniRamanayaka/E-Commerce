@@ -9,14 +9,20 @@ export const CartProvider = ({ children }) => {
 
   // Load cart from localStorage on first render
   useEffect(() => {
-    const storedCart = localStorage.getItem("cartItems");
-    if (storedCart) {
-      setCartItems(JSON.parse(storedCart));
+    try {
+      const storedCart = localStorage.getItem("cartItems");
+      if (storedCart) setCartItems(JSON.parse(storedCart));
+    } catch (_) {
+      // ignore parse errors
     }
   }, []);
 
   const persistCart = (items) => {
-    localStorage.setItem("cartItems", JSON.stringify(items));
+    try {
+      localStorage.setItem("cartItems", JSON.stringify(items));
+    } catch (_) {
+      // quota / private mode issues
+    }
   };
 
   const addToCart = (product) => {
@@ -30,7 +36,7 @@ export const CartProvider = ({ children }) => {
       } else {
         updatedCart = [...prev, { ...product, quantity: 1 }];
       }
-      persistCart(updatedCart); // ✅ Save immediately
+      persistCart(updatedCart); // Save immediately
       return updatedCart;
     });
   };
@@ -55,6 +61,11 @@ export const CartProvider = ({ children }) => {
     });
   };
 
+  const clearCart = () => {
+    setCartItems([]);
+    persistCart([]);
+  };
+
   const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
@@ -64,6 +75,7 @@ export const CartProvider = ({ children }) => {
         addToCart,
         removeFromCart,
         deleteFromCart,
+        clearCart,
         cartCount,
         setCartItems,
       }}

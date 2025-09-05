@@ -7,15 +7,19 @@ import { useApi } from "../services/api.js";
 const ProductDetails = () => {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
+  const [error, setError] = useState("");
   const { addToCart } = useCart();
   const { isAuthenticated, loginWithRedirect } = useAuth0();
   const { getProductById } = useApi();
   const navigate = useNavigate();
 
   useEffect(() => {
-    getProductById(id).then(setProduct).catch(console.error);
+    getProductById(id)
+    .then(setProduct)
+    .catch((err) => setError(err.message || "Failed to load product"));
   }, [id]);
 
+  if (error) return <p style={{ color: "red" }}>{error}</p>;
   if (!product) return <p>Loading...</p>;
 
   const handleAdd = () => {
@@ -36,6 +40,7 @@ const ProductDetails = () => {
       <p><strong>Stock:</strong> {product.stock}</p>
       {product.category && <p><strong>Category:</strong> {product.category}</p>}
       {product.brand && <p><strong>Brand:</strong> {product.brand}</p>}
+      <p><strong>Price:</strong> ${Number(product.price).toFixed(2)}</p>
 
       <button onClick={handleAdd}>Add to Cart</button>
       <button onClick={handleBuyNow}>Buy Now</button>

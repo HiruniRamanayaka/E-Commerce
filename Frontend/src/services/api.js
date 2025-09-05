@@ -67,12 +67,13 @@ export const useApi = () => {
     });
   };
 
-  const createOrder = async (order, token) => {
-    const res = await api.post("/api/orders", order, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    return res.data;
-  };
+  const createOrder = async (order) =>
+    withToken(async (token) => {
+      const res = await api.post("/api/orders", order, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return res.data;
+  });
 
   return {
     getProducts,

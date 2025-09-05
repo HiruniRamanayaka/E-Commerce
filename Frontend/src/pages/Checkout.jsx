@@ -32,18 +32,39 @@ const Checkout = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  // Prevent selecting past dates or Sundays
+  const getMinDate = () => {
+    const now = new Date();
+    const iso = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+      .toISOString()
+      .slice(0, 16);
+    return iso;
+  };
+
+  const isSunday = (dateStr) => {
+    const date = new Date(dateStr);
+    return date.getDay() === 0;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!isAuthenticated) return loginWithRedirect();
     if (cartItems.length === 0) return setMessage("Cart is empty");
+
+    const selected = new Date(form.deliveryDate);
+    const now = new Date();
+    if (isNaN(selected.getTime()) || selected < now) {
+      return setMessage("Delivery date must be today or in the future.");
+    }
+    if (selected.getDay() === 0) {
+      return setMessage("Delivery cannot be scheduled on Sundays.");
+    }
     
     const token = await getAccessTokenSilently();
     const order = {
-      owner: user?.sub,
       items: cartItems.map((item) => ({
         productId: item._id,
-        name: item.name,
-        price: item.price,
         quantity: item.quantity,
       })),
       contact: {
@@ -61,14 +82,15 @@ const Checkout = () => {
     };
 
     try {
-      const createdOrder = await createOrder(order, token);
+      const createdOrder = await createOrder(order);
 
       if (form.paymentMethod === "Card") {
         setCartItems([]);
-        navigate("/payment", { state: { 
-          orderId: createdOrder._id, 
-          total 
-        } });
+        navigate("/payment", { 
+          state: { 
+            orderId: createdOrder._id, 
+            total } 
+        });
       } else {
         setMessage("Order placed successfully!");
         setCartItems([]);
@@ -78,18 +100,7 @@ const Checkout = () => {
     }
   };
 
-  // Prevent selecting past dates or Sundays
-  const getMinDate = () => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    return today.toISOString().slice(0, 16); // format for datetime-local
-  };
-
-  const isSunday = (dateStr) => {
-    const date = new Date(dateStr);
-    return date.getDay() === 0;
-  };
-
+  
   return (
     <div>
       <h2>Checkout</h2>

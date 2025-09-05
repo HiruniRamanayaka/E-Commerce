@@ -61,7 +61,13 @@ const Order = () => {
                 ))}
               </ul>
               <p><strong>Total:</strong> ${order.total}</p>
-              <p><strong>Delivery:</strong> {order.delivery?.date} ({order.delivery?.paymentMethod})</p>
+              <p>
+                <strong>Delivery:</strong>{" "}
+                {order.delivery?.date
+                  ? new Date(order.delivery.date).toLocaleString()
+                  : "N/A"}{" "}
+                ({order.delivery?.paymentMethod || "N/A"})
+              </p>
               {order.status === "pending" && (
                 <div style={{ marginTop: "1rem" }}>
                     <button
