@@ -6,7 +6,7 @@ export const useApi = () => {
   const { getAccessTokenSilently } = useAuth0();
 
   const withToken = async (callback) => {
-    const token = await getAccessTokenSilently();
+    const token = await getAccessTokenSilently({ cacheMode: 'off' });
     return callback(token);
   };
 

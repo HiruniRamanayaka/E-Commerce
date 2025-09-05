@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useApi } from "../services/api.js";
+// import { useAuthToken } from "../hooks/useAuthToken";
 
 const Profile = () => {
   const { user, isAuthenticated, isLoading, getAccessTokenSilently } = useAuth0();
+  // const { accessToken, idToken } = useAuthToken();
+
   const { getProfile, updateProfile } = useApi();
   const [profile, setProfile] = useState({
     name: "",
@@ -14,6 +17,11 @@ const Profile = () => {
   });
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [messages, setMessages] = useState([]);
+  
+  
+  // if (process.env.NODE_ENV === "development") {
+  //   console.log("Access Token:", accessToken);
+  // }
 
   // Fetch profile from DB; if first visit, merge Auth0 claims
   useEffect(() => {
