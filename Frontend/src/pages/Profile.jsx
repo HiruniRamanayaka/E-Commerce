@@ -101,25 +101,26 @@ const Profile = () => {
     }
   }, [messages]);
 
-  if (isLoading || loadingProfile) return <p>Loading...</p>;
-  if (!isAuthenticated) return <p>Please log in</p>;
+  if (isLoading || loadingProfile) 
+    return <div className="text-center py-12 text-gray-600">Loading...</div>;
+
+  if (!isAuthenticated) 
+    return <div className="text-center py-12 text-gray-600">Please log in</div>;
 
   const isSuccess = messages[0]?.includes("successfully");
 
   return (
-    <div style={{ maxWidth: "400px", margin: "2rem auto", fontFamily: "Arial, sans-serif" }}>
-      <h3>Profile</h3>
+    <div className="bg-white min-h-screen flex items-center justify-center px-6 py-12">
+      <div className="max-w-md w-full bg-gray-50 rounded-lg shadow-md p-8">
+      <h3 className="text-2xl font-bold text-[#0a1f44] mb-6 text-center">Profile</h3>
 
       {messages.length > 0 && (
         <ul
-          style={{
-            backgroundColor: isSuccess ? "#d4edda" : "#f8d7da",
-            color: isSuccess ? "#155724" : "#721c24",
-            padding: "1rem",
-            borderRadius: "4px",
-            marginBottom: "1rem",
-            border: `1px solid ${isSuccess ? "#c3e6cb" : "#f5c6cb"}`,
-          }}
+          className={`mb-6 px-4 py-3 rounded-md text-sm ${
+              isSuccess
+                ? "bg-green-100 text-green-800 border border-green-300"
+                : "bg-red-100 text-red-800 border border-red-300"
+            }`}
         >
           {messages.map((msg, i) => (
             <li key={i}>{msg}</li>
@@ -127,63 +128,67 @@ const Profile = () => {
         </ul>
       )}
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div style={{ marginBottom: "0.5rem" }}>
-          <label>Name:</label>
+          <label className="block text-sm font-medium text-gray-700">Name:</label>
           <input
             name="name"
             value={profile.name}
             onChange={handleChange}
             required
-            style={{ width: "100%", padding: "0.5rem", marginTop: "0.25rem" }}
+            className="mt-1 w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
-        <div style={{ marginBottom: "0.5rem" }}>
-          <label>Email:</label>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Email:</label>
           <input
             name="email"
             value={profile.email}
             readOnly
-            style={{ width: "100%", padding: "0.5rem", marginTop: "0.25rem", backgroundColor: "#f0f0f0" }}
+            className="mt-1 w-full p-3 border border-gray-200 bg-gray-100 rounded-md text-gray-500"
           />
         </div>
 
-        <div style={{ marginBottom: "0.5rem" }}>
+        <div>
           <label>Phone:</label>
           <input
             name="phone"
             value={profile.phone}
             onChange={handleChange}
-            style={{ width: "100%", padding: "0.5rem", marginTop: "0.25rem" }}
+            className="mt-1 w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
-        <div style={{ marginBottom: "0.5rem" }}>
-          <label>Address:</label>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Address:</label>
           <input
             name="address"
             value={profile.address}
             onChange={handleChange}
-            style={{ width: "100%", padding: "0.5rem", marginTop: "0.25rem" }}
+            className="mt-1 w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
-        <div style={{ marginBottom: "0.5rem" }}>
-          <label>Country:</label>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Country:</label>
           <input
             name="country"
             value={profile.country}
             onChange={handleChange}
-            style={{ width: "100%", padding: "0.5rem", marginTop: "0.25rem" }}
+            className="mt-1 w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
-        <button type="submit" style={{ padding: "0.5rem 1rem", marginTop: "1rem" }}>
+        <button 
+          type="submit" 
+          className="w-full py-3 bg-[#0a1f44] text-white font-semibold rounded-md hover:bg-blue-700 transition duration-300"
+        >
           Save Profile
         </button>
       </form>
     </div>
+  </div>
   );
 };
 

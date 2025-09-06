@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useApi } from "../services/api.js";
+import logo from "../assets/logo1.png"; 
 
 const Payment = () => {
   const { isAuthenticated } = useAuth0();
@@ -35,26 +36,34 @@ const Payment = () => {
   }, [isAuthenticated, orderId]);
 
   return (
-    <div style={{ padding: "1rem" }}>
-      <h2>Secure Payment</h2>
-      <p><strong>Total to Pay:</strong> ${Number(total || 0).toFixed(2)} </p>
-      <p style={{ backgroundColor: "#fff3cd", padding: "1rem", borderRadius: "4px", border: "1px solid #ffeeba", color: "#856404" }}>
-        {message || "Preparing payment..."}
+    <div className="bg-white min-h-screen flex items-center justify-center px-6 py-12">
+      <div className="max-w-l w-full bg-gray-50 rounded-lg shadow-md p-8">
+        <div className="flex justify-center mb-6">
+          <img src={logo} alt="ShopMart Logo" className="h-20 w-auto" />
+        </div>
+      <h2 className="text-3xl font-bold text-[#0a1f44] mb-4 text-center">Secure Payment</h2>
+      <p className="text-lg text-gray-700 mb-6 text-center">
+        <strong>Total to Pay:</strong> ${Number(total || 0).toFixed(2)}
       </p>
-      {/* <button onClick={() => navigate("/")}>Return to Home</button>  */}
+
+      <div className="bg-yellow-100 border border-yellow-300 text-yellow-800 px-4 py-3 rounded-md mb-6 text-center text-sm">
+          {message || "Preparing payment..."}
+        </div>
+
       {redirectURL && (
-        <p>
+        <div className="text-center">
           <a
             href={redirectURL}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-600 underline"
+            className="inline-block px-6 py-2 bg-[#0a1f44] text-white font-semibold rounded-md hover:bg-blue-700 transition duration-300"
           >
             Proceed to Payment Gateway
           </a>
-        </p>
+        </div>
       )}
     </div>
+  </div>
   );
 };
 

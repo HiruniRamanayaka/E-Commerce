@@ -36,52 +36,91 @@ const Order = () => {
     }
   };
 
-  if (isLoading) return <p>Checking authentication...</p>;
-  if (!isAuthenticated) return <p>Please log in to see your orders.</p>;
-  if (loadingOrders) return <p>Loading your orders...</p>;
-  if (error) return <p style={{ color: "red" }}>Error: {error}</p>;
+  if (isLoading) 
+    return <div className="text-center py-12 text-gray-600">Checking authentication...</div>;
+  if (!isAuthenticated) 
+    return <div className="text-center py-12 text-gray-600">Please log in to see your orders.</div>;
+  if (loadingOrders) 
+    return <div className="text-center py-12 text-gray-600">Loading your orders...</div>;
+  if (error) 
+    return <div className="text-center py-12 text-red-600 font-medium">Error: {error}</div>;
 
   return (
-    <div style={{ padding: "1rem" }}>
-      <h2>My Orders</h2>
-      {orders.length === 0 ? (
-        <p>No orders found.</p>
-      ) : (
-        <ul>
-          {orders.map((order) => (
-            <li key={order._id} style={{ marginBottom: "1rem", border: "1px solid #ddd", padding: "1rem" }}>
-              <p><strong>Order ID:</strong> {order._id}</p>
-              <p><strong>Status:</strong> {order.status}</p>
-              <p><strong>Items:</strong></p>
-              <ul>
-                {order.items.map((item, i) => (
-                  <li key={i}>
-                    {item.name} × {item.quantity}
-                  </li>
-                ))}
-              </ul>
-              <p><strong>Total:</strong> ${order.total}</p>
-              <p>
-                <strong>Delivery:</strong>{" "}
-                {order.delivery?.date
-                  ? new Date(order.delivery.date).toLocaleString()
-                  : "N/A"}{" "}
-                ({order.delivery?.paymentMethod || "N/A"})
-              </p>
-              {order.status === "pending" && (
-                <div style={{ marginTop: "1rem" }}>
-                    <button
-                        onClick={() => handleDelete(order._id)}
-                        style={{ padding: "0.5rem 1rem", backgroundColor: "#dc3545", color: "#fff", border: "none", borderRadius: "4px" }}
-                    >
-                        Cancel Order
-                    </button>
-                </div>
-                )}
-            </li>
-          ))}
-        </ul>
-      )}
+    <div className="bg-white min-h-screen py-12 px-6">
+      <div className="max-w-4xl mx-auto">
+        <h2 className="text-3xl font-bold text-[#0a1f44] mb-8 text-center">My Orders</h2>
+      
+          {orders.length === 0 ? (
+            <p className="text-center text-gray-600">No orders found.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full border border-gray-200 rounded-lg shadow-sm">
+                <thead className="bg-gray-100 text-gray-700 text-sm uppercase">
+                  <tr>
+                    <th className="px-4 py-3 text-left">Order ID</th>
+                    <th className="px-4 py-3 text-left">Status</th>
+                    <th className="px-4 py-3 text-left">Items</th>
+                    <th className="px-4 py-3 text-left">Total</th>
+                    <th className="px-4 py-3 text-left">Delivery</th>
+                    <th className="px-4 py-3 text-left">Payment</th>
+                    <th className="px-4 py-3 text-left">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200 text-sm">
+                    {orders.map((order) => (
+                      <tr key={order._id} className="hover:bg-gray-50">
+                        <td className="px-4 py-3 font-medium text-gray-800">{order._id}</td>
+                        <td className="px-4 py-3 font-semibold">
+                          <span
+                            className={`${
+                              order.status === "pending"
+                                ? "text-yellow-600"
+                                : order.status === "completed"
+                                ? "text-green-600"
+                                : "text-gray-600"
+                            }`}
+                          >
+                            {order.status}
+                          </span>
+                        </td>
+
+                        <td className="px-4 py-3 text-gray-700">
+                          <ul className="list-disc list-inside">
+                            {order.items.map((item, i) => (
+                              <li key={i}>
+                                {item.name} × {item.quantity}
+                              </li>
+                            ))}
+                          </ul>
+                        </td>
+                        <td className="px-4 py-3 text-blue-700 font-semibold">
+                          LKR {order.total.toFixed(2)}
+                        </td>
+                        <td className="px-4 py-3 text-gray-700">
+                          {order.delivery?.date
+                            ? new Date(order.delivery.date).toLocaleString()
+                            : "N/A"}
+                        </td>
+                        <td className="px-4 py-3 text-gray-700">
+                          {order.delivery?.paymentMethod || "N/A"}
+                        </td>
+                        <td className="px-4 py-3">
+                          {order.status === "pending" && (
+                            <button
+                              onClick={() => handleDelete(order._id)}
+                              className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition"
+                            >
+                              Cancel
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+        </div>
     </div>
   );
 };

@@ -37,7 +37,7 @@ app.use(
 );
 
 // Important: parse JSON bodies
-app.use(express.json({ limit: "100kb" }));
+app.use(express.json({ limit: "16kb" }));
 
 // CORS (allow only frontend URLs)
 const allowedOrigins = [
