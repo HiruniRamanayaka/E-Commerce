@@ -6,6 +6,7 @@ export const useCart = () => useContext(CartContext);
 
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
+  const [cartLoading, setCartLoading] = useState(false);
 
   // Load cart from localStorage on first render
   useEffect(() => {
@@ -26,6 +27,7 @@ export const CartProvider = ({ children }) => {
   };
 
   const addToCart = (product) => {
+    setCartLoading(true);
     setCartItems((prev) => {
       const existing = prev.find((item) => item._id === product._id);
       let updatedCart;
@@ -39,9 +41,11 @@ export const CartProvider = ({ children }) => {
       persistCart(updatedCart); // Save immediately
       return updatedCart;
     });
+    setCartLoading(false);
   };
 
   const removeFromCart = (productId) => {
+    setCartLoading(true);
     setCartItems((prev) => {
       const updatedCart = prev
         .map((item) =>
@@ -51,6 +55,7 @@ export const CartProvider = ({ children }) => {
       persistCart(updatedCart); // Save immediately
       return updatedCart;
     });
+    setCartLoading(false);
   };
 
   const deleteFromCart = (productId) => {

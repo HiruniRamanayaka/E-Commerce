@@ -31,16 +31,20 @@ const Profile = () => {
       try {
         const data = await getProfile();
 
-        // Merge custom claims only if DB doesn't already have values
-        const namespace = "https://ecommerce-api.com/";
-        const customClaims = user || {};
+        // Only set profile if it's still loading
+        setProfile((prev) => {
+          if (!loadingProfile) return prev;
 
-        setProfile({
-          name: data.name || customClaims[`${namespace}username`] || user?.name || "",
-          email: data.email || user?.email || "",
-          phone: data.phone || customClaims[`${namespace}phone`] || "",
-          address: data.address || "",
-          country: data.country || customClaims[`${namespace}country`] || "",
+          const namespace = "https://ecommerce-api.com/";
+          const customClaims = user || {};
+
+          return {
+            name: data.name || customClaims[`${namespace}username`] || user?.name || "",
+            email: data.email || user?.email || "",
+            phone: data.phone || customClaims[`${namespace}phone`] || "",
+            address: data.address || "",
+            country: data.country || customClaims[`${namespace}country`] || "",
+          };
         });
       } catch (err) {
         console.error("Profile fetch error:", err);
