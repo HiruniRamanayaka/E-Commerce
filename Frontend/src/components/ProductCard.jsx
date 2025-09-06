@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 const ProductCard = ({ product, onAdd }) => {
   return (
-    <div className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition duration-300 p-4">
+    <div className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition duration-300 p-4 h-[440px] flex flex-col justify-between">
       <Link to={`/product/${product._id}`} className="block">
       <img
           src={product.imageUrl || "../assets/default-image.png"}
