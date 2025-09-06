@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useApi } from "../services/api.js";
+import { Link } from "react-router-dom";
 
 const Order = () => {
   const { isAuthenticated, isLoading } = useAuth0();
@@ -51,7 +52,19 @@ const Order = () => {
         <h2 className="text-3xl font-bold text-[#0a1f44] mb-8 text-center">My Orders</h2>
       
           {orders.length === 0 ? (
-            <p className="text-center text-gray-600">No orders found.</p>
+            <div className="flex flex-col items-center justify-center py-16 bg-white text-center">
+              <div className="text-4xl mb-4">📦</div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">No orders found</h3>
+              <p className="text-sm text-gray-600 mb-6">
+                You haven’t placed any orders yet. Once you do, they’ll appear here.
+              </p>
+              <Link
+                to="/products"
+                className="inline-block px-6 py-2 bg-[#0a1f44] text-white rounded-md hover:bg-blue-700 transition"
+              >
+                Start Shopping
+              </Link>
+            </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="min-w-full border border-gray-200 rounded-lg shadow-sm">
