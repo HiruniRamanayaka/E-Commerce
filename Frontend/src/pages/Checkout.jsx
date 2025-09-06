@@ -67,6 +67,7 @@ const Checkout = () => {
         productId: item._id,
         quantity: item.quantity,
       })),
+      total,
       contact: {
         name: form.name,
         address: form.address,

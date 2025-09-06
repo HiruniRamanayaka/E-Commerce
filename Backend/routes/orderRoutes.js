@@ -5,11 +5,13 @@ import { checkJwt } from "../middleware/authMiddleware.js";
 import { validateOrder } from "../middleware/validateMiddleware.js";
 import { checkRole } from "../middleware/roleMiddleware.js";
 import { checkOrderOwner } from "../middleware/checkOwner.js";
+import { validateBody } from "../middleware/validateBody.js";
+import { orderSchema } from "../validators/order.js";
 
 const router = express.Router();
 
 // POST /api/orders → create new order
-router.post("/", checkJwt, checkRole(["user"]), validateOrder, async (req, res) => {
+router.post("/", checkJwt, checkRole(["user"]),validateBody(orderSchema), validateOrder, async (req, res) => {
   try {
     const auth0Id = req.auth.sub;
 
@@ -73,7 +75,7 @@ router.get("/all", checkJwt, checkRole(["admin"]), async (req, res) => {
 });
 
 // Get single order (owner or admin)
-router.get("/:id", checkJwt, checkRole(["user", "admin"]), async (req, res) => {
+router.get("/:id", checkJwt, checkRole(["user", "admin"]),checkOrderOwner, async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
     if (!order) return res.status(404).json({ message: "Order not found" });
@@ -90,7 +92,7 @@ router.get("/:id", checkJwt, checkRole(["user", "admin"]), async (req, res) => {
 });
 
 // PUT /api/orders/:id → update order status (admin use)
-router.put("/:id", checkJwt, checkRole(["admin"]), async (req, res) => {
+router.put("/:id", checkJwt, checkRole(["admin"]), validateBody(orderSchema), checkOrderOwner, async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
     if (!order) {
@@ -109,7 +111,7 @@ router.put("/:id", checkJwt, checkRole(["admin"]), async (req, res) => {
 });
 
 // DELETE /api/orders/:id → delete order (owner or admin)
-router.delete("/:id", checkJwt, checkRole(["user","admin"]), async (req, res) => {
+router.delete("/:id", checkJwt, checkRole(["user","admin"]), checkOrderOwner, async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
     if (!order) return res.status(404).json({ message: "Order not found" });

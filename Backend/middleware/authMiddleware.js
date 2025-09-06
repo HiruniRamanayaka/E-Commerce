@@ -23,3 +23,11 @@ export const checkJwt = expressjwt({
   algorithms: ["RS256"],
 }
 );
+
+// Helper middleware to translate express-jwt errors to nicer JSON (use in index.js)
+export const jwtErrorHandler = (err, req, res, next) => {
+  if (err && err.name === "UnauthorizedError") {
+    return res.status(401).json({ message: "Invalid or missing token", details: err.message });
+  }
+  next(err);
+};

@@ -3,20 +3,28 @@ dotenv.config();
 import express from "express";
 import connectDB from "./config/db.js";
 import cors from "cors";
+import helmet from "helmet";
+// import rateLimit from "express-rate-limit";
 
 import userRoutes from "./routes/userRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
+import { jwtErrorHandler } from "./middleware/authMiddleware.js";
 
 connectDB();
 
 const app = express();
 
 // SECURITY & MIDDLEWARE
+// Security: hide Express info
+app.disable("x-powered-by");
+
+// Basic security headers
+app.use(helmet());
 
 // Important: parse JSON bodies
-app.use(express.json({ limit: "10kb" }));
+app.use(express.json({ limit: "100kb" }));
 
 // CORS (allow only frontend URLs)
 const allowedOrigins = [
@@ -38,6 +46,29 @@ app.use(
   })
 );
 
+// // General API limiter (all routes)
+// const apiLimiter = rateLimit({
+//   windowMs: 15 * 60 * 1000, // 15 minutes
+//   max: 100, // limit each IP to 100 requests per window
+//   message: { message: "Too many requests, please try again later." },
+//   standardHeaders: true,
+//   legacyHeaders: false,
+// });
+
+// // Stricter limiter for auth-sensitive routes
+// const authLimiter = rateLimit({
+//   windowMs: 15 * 60 * 1000,
+//   max: 20,
+//   message: { message: "Too many login/profile attempts, slow down." },
+// });
+
+// // Apply globally
+// app.use("/api/", apiLimiter);
+
+// // Apply stricter to sensitive endpoints
+// app.use("/api/users/profile", authLimiter);
+// app.use("/api/payments", authLimiter);
+
 // Health check
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok" });
@@ -49,10 +80,18 @@ app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/payments", paymentRoutes);
 
+// JWT error handler (express-jwt UnauthorizedError)
+app.use(jwtErrorHandler);
+
 // GLOBAL ERROR HANDLER
 app.use((err, req, res, next) => {
   console.error("Global error:", err);
-  res.status(500).json({ message: "Server error", error: err.message });
+  // hide stack in production
+  const payload = { message: "Server error" };
+  if (process.env.NODE_ENV !== "production") {
+    payload.error = err.message;
+  }
+  res.status(500).json(payload);
 });
 
 const PORT = process.env.PORT || 4000;

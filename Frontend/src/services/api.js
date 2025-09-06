@@ -99,7 +99,7 @@ export const useApi = () => {
 
   const createOrder = async (order) => {
     try{
-      withToken(async (token) => {
+      return withToken(async (token) => {
         const res = await api.post("/api/orders", order, {
           headers: { Authorization: `Bearer ${token}` },
         });

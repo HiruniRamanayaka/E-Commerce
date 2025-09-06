@@ -3,6 +3,8 @@ import User from "../models/User.js";
 import { checkJwt } from "../middleware/authMiddleware.js";
 import { validateProfile } from "../middleware/validateMiddleware.js";
 import { checkRole } from "../middleware/roleMiddleware.js";
+import { validateBody } from "../middleware/validateBody.js";
+import { userSchema } from "../validators/user.js";
 
 const router = express.Router();
 
@@ -57,7 +59,7 @@ router.get("/profile", checkJwt, checkRole(["user", "admin"]), async (req, res) 
 // });
 
 
-router.put("/profile", checkJwt, checkRole(["user", "admin"]), validateProfile, async (req, res) => {
+router.put("/profile", checkJwt, checkRole(["user", "admin"]), validateBody(userSchema), validateProfile, async (req, res) => {
   try {
     const auth0Id = req.auth.sub;
     const existing = await User.findOne({ auth0Id });

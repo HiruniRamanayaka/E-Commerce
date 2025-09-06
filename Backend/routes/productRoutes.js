@@ -2,6 +2,8 @@ import express from "express";
 import Product from "../models/Product.js";
 import {checkJwt } from "../middleware/authMiddleware.js";
 import {checkRole } from "../middleware/roleMiddleware.js";
+import { validateBody } from "../middleware/validateBody.js";
+import { productSchema } from "../validators/product.js";
 
 const router = express.Router();
 
@@ -29,7 +31,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // (Optional) POST /api/products → add new product (future admin use)
-router.post("/", checkJwt, checkRole(["admin"]),async (req, res) => {
+router.post("/", checkJwt, checkRole(["admin"]), validateBody(productSchema), async (req, res) => {
   try {
     const { name, price, description, stock, imageUrl, category, brand } = req.body;
 

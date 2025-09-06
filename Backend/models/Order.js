@@ -11,7 +11,7 @@ const orderSchema = new mongoose.Schema(
         quantity: { type: Number, required: true, min: 1, max: 100 },
       },
     ],
-    total: { type: Number, required: true },
+    total: { type: Number, required: true, min: 0 },
     contact: {
       name: { type: String, required: true },
       address: { type: String, required: true },
