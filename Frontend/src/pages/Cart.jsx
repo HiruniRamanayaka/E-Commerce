@@ -27,12 +27,24 @@ const Cart = () => {
 
   const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-  if (cartItems.length === 0) 
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white text-gray-600 text-lg">
-        Your cart is empty
+  if (cartItems.length === 0)
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-white px-4">
+      <div className="max-w-md w-full text-center bg-gray-50 border border-gray-200 rounded-lg shadow-sm p-8">
+        <div className="text-4xl mb-4">🛒</div>
+        <h2 className="text-xl font-semibold text-gray-800 mb-2">Your cart is empty</h2>
+        <p className="text-sm text-gray-600 mb-6">
+          Looks like you haven’t added anything yet. Browse products and start shopping!
+        </p>
+        <a
+          href="/products"
+          className="inline-block px-6 py-2 bg-[#0a1f44] text-white font-semibold rounded-md hover:bg-blue-700 transition"
+        >
+          Explore Products
+        </a>
       </div>
-    );
+    </div>
+  );
 
   return (
     <div className="bg-white min-h-screen py-12 px-6">
