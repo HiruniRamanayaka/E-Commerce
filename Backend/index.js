@@ -11,6 +11,7 @@ import productRoutes from "./routes/productRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
 import { jwtErrorHandler } from "./middleware/authMiddleware.js";
+import { sanitizeRequest } from "./middleware/sanitizeMiddleware.js";
 
 connectDB();
 
@@ -21,7 +22,19 @@ const app = express();
 app.disable("x-powered-by");
 
 // Basic security headers
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      useDefaults: true,
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'"],     // block inline JS
+        objectSrc: ["'none'"],     // block Flash/Java/ActiveX
+        upgradeInsecureRequests: [],    // auto-upgrade HTTP→HTTPS
+      },
+    },
+  })
+);
 
 // Important: parse JSON bodies
 app.use(express.json({ limit: "100kb" }));
@@ -73,6 +86,8 @@ app.use(
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok" });
 });
+
+app.use(sanitizeRequest);
 
 // Routes
 app.use("/api/users", userRoutes);
