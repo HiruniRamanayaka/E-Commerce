@@ -98,7 +98,7 @@ It implements **authentication & access control using Auth0 (OIDC)** and **Googl
 2. Create **OAuth 2.0 Client ID** (type: Web Application)  
 3. Add redirect URIs:  
    - `https://localhost:5173`  
-   - `http://localhost:4000/callback` (if backend handles exchange)  
+   - `https://localhost:4000/callback` (if backend handles exchange)  
 4. Get **Client ID** & **Client Secret**  
 5. Add to Auth0 as a **Google Social Connection**  
 
@@ -121,12 +121,12 @@ It implements **authentication & access control using Auth0 (OIDC)** and **Googl
     DOMAIN=your-auth0-domain
     ISSUER_BASE_URL=https://your-auth0-domain
     API_AUDIENCE=https://ecommerce-api
-    FRONTEND_URL=http://localhost:5173
+    FRONTEND_URL=https://localhost:5173
     AUTH0_ROLES_NAMESPACE=https://ecommerce-api.com/roles
 
 #### 🔹 Frontend .env
 
-    VITE_API_BASE_URL=http://localhost:4000
+    VITE_API_BASE_URL=https://localhost:4000
     VITE_AUTH0_DOMAIN=your-auth0-domain
     VITE_AUTH0_CLIENT_ID=your-auth0-client-id
     VITE_AUTH0_AUDIENCE=https://ecommerce-api
