@@ -97,7 +97,7 @@ It implements **authentication & access control using Auth0 (OIDC)** and **Googl
 1. Go to [Google Cloud Console](https://console.cloud.google.com/)  
 2. Create **OAuth 2.0 Client ID** (type: Web Application)  
 3. Add redirect URIs:  
-   - `http://localhost:5173`  
+   - `https://localhost:5173`  
    - `http://localhost:4000/callback` (if backend handles exchange)  
 4. Get **Client ID** & **Client Secret**  
 5. Add to Auth0 as a **Google Social Connection**  

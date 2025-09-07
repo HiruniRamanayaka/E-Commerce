@@ -29,3 +29,4 @@ dist-ssr
 # Ignore SSL certs
 *.pem
 *.key
+*.crt

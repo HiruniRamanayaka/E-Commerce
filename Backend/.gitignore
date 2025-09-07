@@ -1,2 +1,7 @@
 # Ignore environment config
 .env
+
+# .gitignore
+certs/
+*.pem
+*.key

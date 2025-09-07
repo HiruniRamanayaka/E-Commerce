@@ -1,6 +1,8 @@
 import dotenv from "dotenv";
 dotenv.config();
 import express from "express";
+import fs from 'fs';
+import https from 'https';
 import connectDB from "./config/db.js";
 import cors from "cors";
 import helmet from "helmet";
@@ -109,7 +111,17 @@ app.use((err, req, res, next) => {
   res.status(500).json(payload);
 });
 
+const sslOptions = {
+  key: fs.readFileSync('./certs/ecommerce-privateKey.key'),
+  cert: fs.readFileSync('./certs/ecommerce.crt'),
+};
+
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+
+// app.listen(PORT, () => {
+//   console.log(`Server running on http://localhost:${PORT}`);
+// });
+
+https.createServer(sslOptions, app).listen(PORT, () => {
+  console.log(` HTTPS server running at https://localhost:${PORT}`);
 });
