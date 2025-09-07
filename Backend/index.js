@@ -42,7 +42,7 @@ app.use(express.json({ limit: "16kb" }));
 // CORS (allow only frontend URLs)
 const allowedOrigins = [
   process.env.FRONTEND_URL, // production frontend
-  "http://localhost:5173",   // local Vite dev
+  "https://localhost:5173",   // local Vite dev
 ];
 
 app.use(

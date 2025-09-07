@@ -25,3 +25,7 @@ dist-ssr
 
 # Ignore environment config
 .env
+
+# Ignore SSL certs
+*.pem
+*.key
