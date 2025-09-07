@@ -45,7 +45,7 @@ It implements **authentication & access control using Auth0 (OIDC)** and **Googl
 - Node.js (v18+)  
 - MongoDB (local or Atlas)  
 - Auth0 Account → [https://auth0.com](https://auth0.com)  
-- Google Cloud Account (for Google login)  
+- Google Cloud Account → [https://console.cloud.google.com/](for Google login)  
 
 ---
 
