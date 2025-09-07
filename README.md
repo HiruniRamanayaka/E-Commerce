@@ -167,6 +167,7 @@ You can generate self-signed certificates for local HTTPS testing in two ways:
 
    Ensure these files remain local and are ignored via .gitignore:
 
+.gitignore
    *.key
    *.crt
    *.pem
@@ -211,26 +212,26 @@ Now open 👉 https://localhost:5173
 --- 
 
 ### 📦 Project Structure
-project-root/
-│── backend/
-│   ├── config/
-│   ├── middleware/
-│   ├── models/
-│   ├── routes/
-│   ├── validators/
-│   ├── index.js
-│   ├── seed.js
-│   ├── .env
-│   └── package.json
+project-root/ 
+│── backend/ 
+│   ├── config/ 
+│   ├── middleware/ 
+│   ├── models/ 
+│   ├── routes/ 
+│   ├── validators/ 
+│   ├── index.js 
+│   ├── seed.js 
+│   ├── .env 
+│   └── package.json 
 │
-│── frontend/
-│   ├── public/
-│   ├── src/
-│   ├── .env
-│   └── package.json
+│── frontend/ 
+│   ├── public/ 
+│   ├── src/ 
+│   ├── .env 
+│   └── package.json 
 │
-│── SE2021XXX.json
-│── README.md
+│── SE2021XXX.json 
+│── README.md 
 
 ---
 
