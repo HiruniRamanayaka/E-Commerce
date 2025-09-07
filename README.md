@@ -146,8 +146,34 @@ It implements **authentication & access control using Auth0 (OIDC)** and **Googl
 
 ---
 
+### 7️⃣ SSL Certificates Setup (Development Only)
 
-### 5️⃣ Run the Application
+You can generate self-signed certificates for local HTTPS testing in two ways:
+
+1. **OpenSSL CLI**:
+
+      openssl genrsa -out ecommerce-privateKey.key 2048
+      openssl req -new -key ecommerce-privateKey.key -out ecommerce.csr
+      openssl x509 -req -days 365 -in ecommerce.csr -signkey ecommerce-privateKey.key -out ecommerce.crt
+
+   Place files in:
+      -  backend/certs/ (both key & cert)
+      -  frontend/ root (both key & cert)
+
+ 2. **Regery Online Tool**:
+      Visit Regery’s Self-Signed Certificate Generator, enter your site name, and click Create SSL to download your key and cert instantly
+
+   *Note*: Self-signed certificates cause browser warnings and are suitable only for development environments, not production
+
+   Ensure these files remain local and are ignored via .gitignore:
+
+   *.key
+   *.crt
+   *.pem
+   certs/
+---
+
+### 8️⃣ Run the Application
 #### Backend
     cd backend
     npm install
@@ -158,7 +184,7 @@ It implements **authentication & access control using Auth0 (OIDC)** and **Googl
     npm install
     npm run dev
 
-Now open 👉 http://localhost:5173
+Now open 👉 https://localhost:5173
 
 ---
 
@@ -211,7 +237,8 @@ project-root/
 ### 📝 Blog
 
 👉 My Blog on Medium
- [](replace with actual link)
+ [Blog01](https://medium.com/@hiruniramanayaka9/implementing-owasp-top-10-mitigations-and-oidc-authentication-lessons-from-building-a-secure-34c2fe3a7c30)
+ [Blog02-Auth0](https://medium.com/@hiruniramanayaka9/securing-your-mern-application-with-auth0-authentication-rbac-and-beyond-3c503ad47cf8)
 
 #### Covers:
   -  OWASP Top 10 mitigations
