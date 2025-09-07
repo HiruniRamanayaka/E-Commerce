@@ -59,28 +59,28 @@ app.use(
   })
 );
 
-// // General API limiter (all routes)
-// const apiLimiter = rateLimit({
-//   windowMs: 15 * 60 * 1000, // 15 minutes
-//   max: 100, // limit each IP to 100 requests per window
-//   message: { message: "Too many requests, please try again later." },
-//   standardHeaders: true,
-//   legacyHeaders: false,
-// });
+// General API limiter (all routes)
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per window
+  message: { message: "Too many requests, please try again later." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
-// // Stricter limiter for auth-sensitive routes
-// const authLimiter = rateLimit({
-//   windowMs: 15 * 60 * 1000,
-//   max: 20,
-//   message: { message: "Too many login/profile attempts, slow down." },
-// });
+// Stricter limiter for auth-sensitive routes
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  message: { message: "Too many login/profile attempts, slow down." },
+});
 
-// // Apply globally
-// app.use("/api/", apiLimiter);
+// Apply globally
+app.use("/api/", apiLimiter);
 
-// // Apply stricter to sensitive endpoints
-// app.use("/api/users/profile", authLimiter);
-// app.use("/api/payments", authLimiter);
+// Apply stricter to sensitive endpoints
+app.use("/api/users/profile", authLimiter);
+app.use("/api/payments", authLimiter);
 
 // Health check
 app.get("/api/health", (req, res) => {
