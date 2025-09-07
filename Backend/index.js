@@ -4,7 +4,7 @@ import express from "express";
 import connectDB from "./config/db.js";
 import cors from "cors";
 import helmet from "helmet";
-// import rateLimit from "express-rate-limit";
+import rateLimit from "express-rate-limit";
 
 import userRoutes from "./routes/userRoutes.js";
 import productRoutes from "./routes/productRoutes.js";

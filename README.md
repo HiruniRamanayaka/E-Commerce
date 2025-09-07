@@ -65,8 +65,8 @@ It implements **authentication & access control using Auth0 (OIDC)** and **Googl
 
 2. **Create Application (Frontend)**  
    - Type: **Single Page App (SPA)**  
-   - Allowed Callback URLs: `http://localhost:5173`  
-   - Allowed Logout URLs: `http://localhost:5173`  
+   - Allowed Callback URLs: `https://localhost:5173`  
+   - Allowed Logout URLs: `https://localhost:5173`  
    - Save **Domain** & **Client ID** → put into `frontend/.env`  
 
 3. **Create API (Backend)**  
