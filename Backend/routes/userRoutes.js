@@ -70,11 +70,11 @@ router.put("/profile", checkJwt, checkRole(["user", "admin"]), validateBody(user
 
     const allowedFields = {
       name: req.body.name,
+      // email always from Auth0
+      email: req.auth.email || existing.email,
       phone: req.body.phone,
       address: req.body.address,
       country: req.body.country,
-      // email always from Auth0
-      email: req.auth.email || existing.email,
     };
 
     const updated = await User.findOneAndUpdate(
